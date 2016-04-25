@@ -5,8 +5,7 @@ Taking project 5 to a whole new level... (Sockets, Minimax,...)
 * Avoid extra large super commits.
 * Be clear in the commit title.
 * Silly commit descriptions are not allowed (except in the last commit).
-* Generally specific tasks will be posted as issues, each issue should have its own branche.
-* > Lisa, in this house we follow the rules of thermodynamics!!! -Homer Jay Simpson
+* Generally specific tasks will be posted as issues, each issue should have its own branch.
 ## Design Notes.
-The current project follows the Model-View-Controller (MVC) design pattern to implement the esential part of the project.  
+The current project follows the **Model-View-Controller (MVC)** design pattern to implement the esential part of the project.  
 More specific notes about this will be updated as soon as possible.
