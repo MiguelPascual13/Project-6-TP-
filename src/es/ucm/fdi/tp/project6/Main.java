@@ -21,6 +21,7 @@ import es.ucm.fdi.tp.basecode.bgame.model.AIAlgorithm;
 import es.ucm.fdi.tp.basecode.bgame.model.Game;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
+import es.ucm.fdi.tp.basecode.minmax.MinMax;
 import es.ucm.fdi.tp.project6.controller.SwingController;
 import es.ucm.fdi.tp.project6.factories.AdvancedTTTFactoryExt;
 import es.ucm.fdi.tp.project6.factories.AtaxxFactoryExt;
@@ -161,6 +162,32 @@ public class Main {
 			return id;
 		}
 	}
+	
+	private enum AlgorithmForAIPlayer {
+		NONE("none", "No AI Algorithm"), MINMAX("minmax", "MinMax"), MINMAXAB("minmaxab",
+				"MinMax with Alhpa-Beta Prunning");
+
+		private String id;
+		private String desc;
+
+		AlgorithmForAIPlayer(String id, String desc) {
+			this.id = id;
+			this.desc = desc;
+		}
+
+		public String getId() {
+			return id;
+		}
+
+		public String getDesc() {
+			return desc;
+		}
+
+		@Override
+		public String toString() {
+			return desc;
+		}
+	}
 
 	/*-----DEFAULT CONSTANTS-----*/
 
@@ -186,6 +213,8 @@ public class Main {
 	 * Modo de juego por defecto. Para probar errores, será un jugador manual.
 	 */
 	final private static PlayerMode DEFAULT_PLAYERMODE = PlayerMode.MANUAL;
+	
+	final private static AlgorithmForAIPlayer DEFAULT_AIALG = AlgorithmForAIPlayer.NONE;
 
 	public static final String OBSTACLE = "*";
 	public static final int PLAYER_MODES_NUMBER = 3;
@@ -278,6 +307,8 @@ public class Main {
 	 * utiliza, por lo que siempre es {@code null}.
 	 */
 	private static AIAlgorithm aiPlayerAlg;
+	
+	private static Integer minmaxTreeDepth;
 
 	/**
 	 * Number of obstacles provided with the option -o ({@code null} if not
@@ -324,6 +355,8 @@ public class Main {
 			parseViewOption(line);
 			parseMultiViewOption(line);
 			parsePlayersOptions(line);
+			parseMixMaxDepthOption(line);
+			parseAIAlgOption(line);
 
 			// if there are some remaining arguments, then something wrong is
 			// provided in the command line!
@@ -358,8 +391,72 @@ public class Main {
 		cmdLineOptions.addOption(constructDimensionOption()); // -d or --dim
 		cmdLineOptions.addOption(constructObstaclesOption()); // -o or
 																// --obstacles
+		cmdLineOptions.addOption(constructMinMaxDepathOption()); // -md or
+		// --minmax-depth
+		cmdLineOptions.addOption(constructAIAlgOption()); // -aialg ...
+
+		// parse the command line as provided in args
+		//
 	}
 
+	
+	private static Option constructMinMaxDepathOption() {
+		Option opt = new Option("md", "minmax-depth", true, "The maximum depth of the MinMax tree");
+		opt.setArgName("number");
+		return opt;
+	}
+	
+	private static void parseMixMaxDepthOption(CommandLine line) throws ParseException {
+		String depthVal = line.getOptionValue("md");
+		minmaxTreeDepth = null;
+
+		if (depthVal != null) {
+			try {
+				minmaxTreeDepth = Integer.parseInt(depthVal);
+			} catch (NumberFormatException e) {
+				throw new ParseException("Invalid value for the MinMax depth '" + depthVal + "'");
+			}
+		}
+	}
+	
+	private static Option constructAIAlgOption() {
+		String optionInfo = "The AI algorithm to use ( ";
+		for (AlgorithmForAIPlayer alg : AlgorithmForAIPlayer.values()) {
+			optionInfo += alg.getId() + " [for " + alg.getDesc() + "] ";
+		}
+		optionInfo += "). By defualt, no algorithm is used.";
+		Option opt = new Option("aialg", "ai-algorithm", true, optionInfo);
+		opt.setArgName("algorithm for ai player");
+		return opt;
+	}
+	
+	private static void parseAIAlgOption(CommandLine line) throws ParseException {
+		String aialg = line.getOptionValue("aialg", DEFAULT_AIALG.getId());
+
+		AlgorithmForAIPlayer selectedAlg = null;
+		for (AlgorithmForAIPlayer a : AlgorithmForAIPlayer.values()) {
+			if (a.getId().equals(aialg)) {
+				selectedAlg = a;
+				break;
+			}
+		}
+
+		if (selectedAlg == null) {
+			throw new ParseException("Uknown AI algorithms '" + aialg + "'");
+		}
+
+		switch (selectedAlg) {
+		case MINMAX:
+			aiPlayerAlg = minmaxTreeDepth == null ? new MinMax(false) : new MinMax(minmaxTreeDepth, false);
+			break;
+		case MINMAXAB:
+			aiPlayerAlg = minmaxTreeDepth == null ? new MinMax() : new MinMax(minmaxTreeDepth);
+			break;
+		case NONE:
+			aiPlayerAlg = null;
+			break;
+		}
+	}
 	/**
 	 * Builds the multiview (-m or --multiviews) CLI option.
 	 * 
@@ -881,8 +978,34 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-
 		parseArgs(args);
-		startGame();
+		//switch(applicationMode){
+		//case NORMAL:
+			startGame();
+			//break;
+		//case CLIENT:
+			//startClient();
+			//break;
+		//case SERVER:
+			//startServer();
+			//break;
+		//}
 	}
+	/*
+	private static void startServer(){
+		GameServer c = new GameServer(gameFactory, pieces, serverPort);
+		c.start();
+	}
+	private static void startClient(){
+		try{
+			GameClient c = new GameClient(serverHost, serverPort);
+			gameFactory = c.getGameFactory();
+			gameFactory.createSwingView(c,c,c.getPlayerPiece());
+			c.start();
+		}
+		catch (Exception e){
+		 System.err.println(e);	
+		}
+	}
+	*/
 }
