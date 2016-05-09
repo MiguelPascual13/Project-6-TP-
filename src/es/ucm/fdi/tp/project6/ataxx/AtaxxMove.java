@@ -258,7 +258,14 @@ public class AtaxxMove extends GameMove {
 	public String help() {
 		return "Row and column for origin and for destination, separated by spaces (four numbers).";
 	}
-
+	
+	public int getRow(){
+		return row;
+	}
+	public int getCol(){
+		return col;
+	}
+	
 	@Override
 	public String toString() {
 		if (getPiece() == null) {
