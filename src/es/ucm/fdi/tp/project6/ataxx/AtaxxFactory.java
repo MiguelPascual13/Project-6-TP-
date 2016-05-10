@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import es.ucm.fdi.tp.basecode.bgame.control.AIPlayer;
 import es.ucm.fdi.tp.basecode.bgame.control.ConsolePlayer;
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.DummyAIPlayer;
@@ -49,7 +50,7 @@ public class AtaxxFactory implements GameFactory {
 		this.dim = dim;
 		this.obstacles = obstacles;
 	}
-	
+
 	@Override
 	public GameRules gameRules() {
 		return new AtaxxRules(dim, obstacles);
@@ -69,7 +70,11 @@ public class AtaxxFactory implements GameFactory {
 
 	@Override
 	public Player createAIPlayer(AIAlgorithm alg) {
-		return new DummyAIPlayer(createRandomPlayer(), 1000);
+		if ( alg != null ) {
+			return new AIPlayer(alg);
+		} else {
+			return new DummyAIPlayer(createRandomPlayer(), 1000);
+		}
 	}
 
 	/**
@@ -91,11 +96,12 @@ public class AtaxxFactory implements GameFactory {
 	public void createConsoleView(Observable<GameObserver> g, Controller c) {
 		new GenericConsoleView(g, c);
 	}
-	
-	/**Esto ya no se usa.*/
+
+	/** Esto ya no se usa. */
 	@Override
 	public void createSwingView(final Observable<GameObserver> g,
-			final Controller c, final Piece viewPiece, Player random, Player ai) {
+			final Controller c, final Piece viewPiece, Player random,
+			Player ai) {
 		throw new UnsupportedOperationException("There is no swing view");
 	}
 

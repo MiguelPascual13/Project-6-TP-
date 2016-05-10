@@ -1,6 +1,6 @@
 package es.ucm.fdi.tp.project6.utils;
 
-public class Utils {
+public class ExternalUtils {
 
 	/**
 	 * Tells if a cell is too far in the ataxx sense to another, it probably
@@ -16,5 +16,10 @@ public class Utils {
 			int row, int column) {
 		return Math.max(Math.abs(oldRow - row),
 				Math.abs(oldColumn - column)) > 2;
+	}
+
+	public static int infiniteDistance(int oldRow, int oldColumn, int row,
+			int column) {
+		return Math.max(Math.abs(oldRow - row), Math.abs(oldColumn - column));
 	}
 }

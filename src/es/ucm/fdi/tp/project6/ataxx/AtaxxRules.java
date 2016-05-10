@@ -1,9 +1,7 @@
 package es.ucm.fdi.tp.project6.ataxx;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import es.ucm.fdi.tp.basecode.bgame.Utils;
 import es.ucm.fdi.tp.basecode.bgame.model.Board;
@@ -13,6 +11,7 @@ import es.ucm.fdi.tp.basecode.bgame.model.GameMove;
 import es.ucm.fdi.tp.basecode.bgame.model.GameRules;
 import es.ucm.fdi.tp.basecode.bgame.model.Pair;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
+import es.ucm.fdi.tp.project6.utils.ExternalUtils;
 
 /**
  * Rules for Ataxx game.
@@ -31,7 +30,8 @@ import es.ucm.fdi.tp.basecode.bgame.model.Piece;
  * <li>El numero de jugadores esta entre 2 y 4.</li>
  * <li>Los jugadores juegan en el orden proporcionado, cada uno colocando una
  * ficha en una casilla vacia. El ganador es el que consigua construir una linea
- * (horizontal, vertical o diagonal) de N fichas consecutivas del mismo tipo.</li>
+ * (horizontal, vertical o diagonal) de N fichas consecutivas del mismo tipo.
+ * </li>
  * </ul>
  *
  */
@@ -164,7 +164,8 @@ public class AtaxxRules implements GameRules {
 							playersPieces.get(wonIndex));
 				}
 			} else if ((pos = onlyOneAlive(board, playersPieces)) != null) {
-				return new Pair<State, Piece>(State.Won, playersPieces.get(pos));
+				return new Pair<State, Piece>(State.Won,
+						playersPieces.get(pos));
 			} else {
 				return gameInPlayResult;
 			}
@@ -245,8 +246,8 @@ public class AtaxxRules implements GameRules {
 		int i = playersPieces.indexOf(lastPlayer);
 		List<GameMove> moves = validMoves(board, playersPieces,
 				playersPieces.get((i + 1) % playersPieces.size()));
-		while (board.getPieceCount(playersPieces.get((i + 1)
-				% playersPieces.size())) == 0
+		while (board.getPieceCount(
+				playersPieces.get((i + 1) % playersPieces.size())) == 0
 				|| moves.size() == 0) {
 			i++;
 			moves = validMoves(board, playersPieces,
@@ -260,6 +261,9 @@ public class AtaxxRules implements GameRules {
 			{ -2, -1 }, { -2, 0 }, { -2, 1 }, { -2, 2 }, { -1, -2 }, { -1, 2 },
 			{ 0, -2 }, { 0, 2 }, { 1, -2 }, { 1, 2 }, { 2, -2 }, { 2, -1 },
 			{ 2, 0 }, { 2, 1 }, { 2, 2 } };
+
+	private static final int oneLayerDeltas[][] = { { 0, 1 }, { 1, 1 },
+			{ 1, 0 }, { 1, -1 }, { 0, -1 }, { -1, 1 }, { -1, 0 }, { -1, -1 } };
 
 	private boolean inBoard(int x, int y) {
 		return x >= 0 && y >= 0 && x < dim && y < dim;
@@ -286,54 +290,90 @@ public class AtaxxRules implements GameRules {
 	}
 
 	@Override
-	public double evaluate(Board board, List<Piece> pieces, Piece turn, Piece p) {
-		int maxPlacesAvailable = dim*dim-obstacles;
-		int ourPoints = board.getPieceCount(p);
-		int maxOfOthers = board.getPieceCount(turn);
-		for(Piece q :pieces){
-			if(!p.equals(q)){
-				int x = board.getPieceCount(q);
-				if(x>maxOfOthers){					
-				maxOfOthers = x;
-				}
-			}
+	public double evaluate(Board board, List<Piece> pieces, Piece turn,
+			Piece p) {
+		Integer lossCoefficient = 0;
+		Integer gainCoefficient = 0;
+		Pair<Integer, Integer> evaluationResult = calculateCoefficients(
+				lossCoefficient, gainCoefficient, board, pieces, turn, p);
+		lossCoefficient = evaluationResult.getFirst();
+		gainCoefficient = evaluationResult.getSecond();
+
+		int ourPieces = board.getPieceCount(p);
+		int maxOfOtherPieces = 0;
+		for (Piece q : pieces) {
+			int x = board.getPieceCount(q);
+			maxOfOtherPieces = Math.max(x, maxOfOtherPieces);
 		}
-		Map<Pair<Integer,Integer>, Integer> enemies = new HashMap<>();
-		int maxEnemies=0;
-		for (int i = 0; i < dim; i++) {
-			for (int j = 0; j < dim; j++) {
-				if (board.getPosition(i, j) == p) {
-					lookAround(board, enemies, p, i, j, maxEnemies);
-				}
-			}
-		}	
-		return ((ourPoints-maxOfOthers)/maxPlacesAvailable)*(ourPoints- maxEnemies)/maxPlacesAvailable;
+
+		if (ourPieces - lossCoefficient == 0)
+			return -1;
+		else if (gainCoefficient - maxOfOtherPieces == 0)
+			return 1;
+		else
+			return (ourPieces - lossCoefficient + gainCoefficient
+					- maxOfOtherPieces) / (dim * dim - obstacles);
 	}
 
-	public void lookAround(Board board,
-			Map<Pair<Integer,Integer>, Integer> enemies, Piece p,
-			int i, int j, int maxEnemies) {
-		for (int[] ds : deltas) {
-			int x = i + ds[0];
-			int y = j + ds[1];
-			if (inBoard(x, y) && board.getPosition(x, y) != null
-					&& board.getPosition(x, y) != obstacle
-					&& board.getPosition(x, y) != p) {
-					Pair<Integer,Integer> coord = new Pair<Integer,Integer>(x,y);
-					if(enemies.containsKey(coord)){
-						Integer count = enemies.get(coord);
-						count++;
-						enemies.put(coord, count);
-					}
-					else {
-						enemies.put(coord,1);
-					}
-					if(maxEnemies<enemies.get(coord)){
-						maxEnemies = enemies.get(coord);
-					}
+	private Pair<Integer, Integer> calculateCoefficients(
+			Integer lossCoefficient, Integer gainCoefficient, Board board,
+			List<Piece> pieces, Piece turn, Piece p) {
+
+		for (int i = 0; i < dim; i++) {
+			for (int j = 0; j < dim; j++) {
+				if (board.getPosition(i, j) == turn) {
+					// the enemy player (lossCoefficient)
+					lossCoefficient = Math.max(
+							calculateCoefficient(board, i, j, null),
+							lossCoefficient);
+				} else if (board.getPosition(i, j) == p) {
+					// intelligent player (gainCoefficient)
+					gainCoefficient = Math.max(
+							calculateCoefficient(board, i, j, null),
+							gainCoefficient);
+				}
 			}
 		}
 
+		return new Pair<Integer, Integer>(lossCoefficient, gainCoefficient);
+	}
+
+	/* If the passive piece is null we look at all the enemies. */
+	private int calculateCoefficient(Board board, int row, int column,
+			Piece passivePiece) {
+		int coefficient = 0;
+		for (int[] ds : deltas) {
+			int x = row + ds[0];
+			int y = column + ds[1];
+			if (inBoard(x, y) && board.getPosition(x, y) == null) {
+				int aux = 0;
+				if (ExternalUtils.infiniteDistance(row, column, x, y) == 1)
+					aux = 1;
+				coefficient = Math.max(
+						howManyAreEaten(board, x, y, passivePiece) + aux,
+						coefficient);
+			}
+		}
+		return coefficient;
+	}
+
+	// if null we don´t care about the enemy.
+	private int howManyAreEaten(Board board, int row, int column, Piece enemy) {
+		int eaten = 0;
+
+		for (int[] ds : oneLayerDeltas) {
+			int x = row + ds[0];
+			int y = column + ds[1];
+			if (enemy != null) {
+				if (inBoard(x, y) && board.getPosition(x, y) == enemy)
+					eaten++;
+			} else {
+				if (inBoard(x, y) && board.getPosition(x, y) != null)
+					eaten++;
+			}
+		}
+
+		return eaten;
 	}
 
 }

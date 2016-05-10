@@ -10,7 +10,7 @@ import es.ucm.fdi.tp.basecode.bgame.model.GameRules;
 import es.ucm.fdi.tp.basecode.bgame.model.Pair;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 import es.ucm.fdi.tp.project6.ataxx.AtaxxMove;
-import es.ucm.fdi.tp.project6.utils.Utils;
+import es.ucm.fdi.tp.project6.utils.ExternalUtils;
 
 /**
  * Move controller for ataxx.
@@ -52,7 +52,7 @@ public class AtaxxMoveController extends MoveController {
 			if (somethingSelected) {
 				if (board.getPosition(row, column) == null) {
 					setDestinationCell(row, column);
-					if (Utils.InfiniteDistanceExceeded(oldRow, oldColumn, row,
+					if (ExternalUtils.InfiniteDistanceExceeded(oldRow, oldColumn, row,
 							column)) {
 						return NOTHING_TO_REPAINT;
 					}
@@ -125,7 +125,7 @@ public class AtaxxMoveController extends MoveController {
 			List<Pair<Integer, Integer>> filterOnCellsList = new ArrayList<Pair<Integer, Integer>>();
 			for (int i = 0; i < board.getRows(); i++) {
 				for (int j = 0; j < board.getCols(); j++) {
-					if ((!Utils.InfiniteDistanceExceeded(selectedRow,
+					if ((!ExternalUtils.InfiniteDistanceExceeded(selectedRow,
 							selectedColumn, i, j)
 							&& board.getPosition(i, j) == null)
 							|| ((i == selectedRow) && (j == selectedColumn))) {
