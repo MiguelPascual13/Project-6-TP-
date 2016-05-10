@@ -1,7 +1,9 @@
 package es.ucm.fdi.tp.project6.ataxx;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import es.ucm.fdi.tp.basecode.bgame.Utils;
 import es.ucm.fdi.tp.basecode.bgame.model.Board;
@@ -267,8 +269,8 @@ public class AtaxxRules implements GameRules {
 	public List<GameMove> validMoves(Board board, List<Piece> playersPieces,
 			Piece turn) {
 		List<GameMove> moves = new ArrayList<GameMove>();
-		for (int i = 0; i < board.getRows(); i++) {
-			for (int j = 0; j < board.getCols(); j++) {
+		for (int i = 0; i < dim; i++) {
+			for (int j = 0; j < dim; j++) {
 				if (board.getPosition(i, j) == turn) {
 					for (int[] ds : deltas) {
 						int x = i + ds[0];
@@ -285,36 +287,53 @@ public class AtaxxRules implements GameRules {
 
 	@Override
 	public double evaluate(Board board, List<Piece> pieces, Piece turn, Piece p) {
-		int maxPlacesAvailable = dim * dim - obstacles;
-		int n = board.getPieceCount(p);
-		int m = board.getPieceCount(turn);
-		int maxY=0;
-		for (Piece q : pieces) {
-			if (!p.equals(q)) {
+		int maxPlacesAvailable = dim*dim-obstacles;
+		int ourPoints = board.getPieceCount(p);
+		int maxOfOthers = board.getPieceCount(turn);
+		for(Piece q :pieces){
+			if(!p.equals(q)){
 				int x = board.getPieceCount(q);
-				if (x > m) {
-					m = x;
+				if(x>maxOfOthers){					
+				maxOfOthers = x;
 				}
 			}
 		}
-		List<GameMove> posibleMoves = validMoves(board, pieces, p); 
-		for(int i=0; i < posibleMoves.size(); i++){
-			int y = numberOfNeighbors(board, p, turn, (AtaxxMove) posibleMoves.get(i));
-			if (y > maxY) {
-				maxY = y;
+		Map<Pair<Integer,Integer>, Integer> enemies = new HashMap<>();
+		int maxEnemies=0;
+		for (int i = 0; i < dim; i++) {
+			for (int j = 0; j < dim; j++) {
+				if (board.getPosition(i, j) == p) {
+					lookAround(board, enemies, p, i, j, maxEnemies);
+				}
 			}
-		}
-		return ((n + maxY)/ maxPlacesAvailable) - ((m-maxY) / maxPlacesAvailable);
+		}	
+		return ((ourPoints-maxOfOthers)/maxPlacesAvailable)*(ourPoints- maxEnemies)/maxPlacesAvailable;
 	}
-	private int numberOfNeighbors(Board board, Piece p, Piece turn, AtaxxMove move){
-		int neighbors=0;
+
+	public void lookAround(Board board,
+			Map<Pair<Integer,Integer>, Integer> enemies, Piece p,
+			int i, int j, int maxEnemies) {
 		for (int[] ds : deltas) {
-			int x = move.getRow() + ds[0];
-			int y = move.getCol() + ds[1];
-			if (inBoard(x, y) && board.getPosition(x, y) != null && board.getPosition(x, y)!=p) {
-				neighbors++;
+			int x = i + ds[0];
+			int y = j + ds[1];
+			if (inBoard(x, y) && board.getPosition(x, y) != null
+					&& board.getPosition(x, y) != obstacle
+					&& board.getPosition(x, y) != p) {
+					Pair<Integer,Integer> coord = new Pair<Integer,Integer>(x,y);
+					if(enemies.containsKey(coord)){
+						Integer count = enemies.get(coord);
+						count++;
+						enemies.put(coord, count);
+					}
+					else {
+						enemies.put(coord,1);
+					}
+					if(maxEnemies<enemies.get(coord)){
+						maxEnemies = enemies.get(coord);
+					}
 			}
 		}
-		return neighbors;
+
 	}
+
 }
