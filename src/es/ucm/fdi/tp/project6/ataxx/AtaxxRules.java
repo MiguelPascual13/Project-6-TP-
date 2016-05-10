@@ -305,14 +305,16 @@ public class AtaxxRules implements GameRules {
 			int x = board.getPieceCount(q);
 			maxOfOtherPieces = Math.max(x, maxOfOtherPieces);
 		}
-
+		
+		System.out.println(lossCoefficient);
+		
 		if (ourPieces - lossCoefficient == 0)
 			return -1;
 		else if (gainCoefficient - maxOfOtherPieces == 0)
 			return 1;
 		else
-			return (ourPieces - lossCoefficient + gainCoefficient
-					- maxOfOtherPieces) / (dim * dim - obstacles);
+			return (double)(ourPieces - lossCoefficient + gainCoefficient
+					- maxOfOtherPieces) / (double)(dim * dim - obstacles);
 	}
 
 	private Pair<Integer, Integer> calculateCoefficients(
