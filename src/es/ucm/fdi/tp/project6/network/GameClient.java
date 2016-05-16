@@ -62,8 +62,10 @@ public class GameClient extends Controller implements Observable<GameObserver>{
 	}
 
 	public void addObserver(GameObserver o) {
+		this.observers.add(o);
 	}
 	public void removeObserver(GameObserver o) {
+		this.observers.remove(o);
 	}
 	
 	public void makeMove(Player p){
@@ -84,6 +86,7 @@ public class GameClient extends Controller implements Observable<GameObserver>{
 		}
 	}
 	public void start(){
+	
 		this.observers.add(); //No se cuales son los parametros
 		gameOver=false;
 		while(!gameOver){

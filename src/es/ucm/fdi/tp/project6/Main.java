@@ -325,14 +325,16 @@ public class Main {
 
 	private static int serverPort;
 
-	private enum applicationMode {
+	private static ApplicationMode applicationMode;
+
+	enum ApplicationMode {
 		NORMAL("normal", "No Servers and Clients"), CLIENT("cliente",
 				"Client version"), SERVER("server", "Server version");
 
 		private String id;
 		private String desc;
 
-		applicationMode(String id, String desc) {
+		ApplicationMode(String id, String desc) {
 			this.id = id;
 			this.desc = desc;
 		}
@@ -1017,22 +1019,34 @@ public class Main {
 
 	public static void main(String[] args) {
 		parseArgs(args);
-		// switch (applicationMode) { No entiendo porque no me coge el enum del
-		// applicationMode que he hecho arriba
-		// case NORMAL:
-		startGame();
-		// break;
-		/*
-		 * case CLIENT: startClient(); break; case SERVER: startServer(); break;
-		 * }
-		 */
+		switch (applicationMode) {
+		case NORMAL:
+			startGame();
+			break;
+		case CLIENT:
+			startClient();
+			break;
+		case SERVER:
+			startServer();
+			break;
+		}
 	}
-	/*
-	 * private static void startServer(){ GameServer c = new
-	 * GameServer(gameFactory, pieces, serverPort); c.start(); } private static
-	 * void startClient(){ try{ GameClient c = new GameClient(serverHost,
-	 * serverPort); gameFactory = c.getGameFactory();
-	 * gameFactory.createSwingView(c,c,c.getPlayerPiece()); c.start(); } catch
-	 * (Exception e){ System.err.println(e); } }
-	 */
+
+	private static void startServer() {
+		GameServer c = new GameServer(gameFactory, pieces, serverPort);
+		c.start();
+	}
+
+	private static void startClient() {
+		try {
+			GameClient c = new GameClient(serverHost, serverPort);
+			gameFactory = c.getGameFactory();
+			gameFactory.createSwingView(c, c, c.getPlayerPiece(),
+					gameFactory.createRandomPlayer(),
+					gameFactory.createAIPlayer(aiPlayerAlg));
+			c.start();
+		} catch (Exception e) {
+			System.err.println(e);
+		}
+	}
 }
