@@ -15,14 +15,21 @@ import es.ucm.fdi.tp.basecode.bgame.model.Game.State;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
+import es.ucm.fdi.tp.project6.network.responseclasses.ChangeTurnResponse;
+import es.ucm.fdi.tp.project6.network.responseclasses.ErrorResponse;
+import es.ucm.fdi.tp.project6.network.responseclasses.GameOverResponse;
+import es.ucm.fdi.tp.project6.network.responseclasses.GameStartResponse;
+import es.ucm.fdi.tp.project6.network.responseclasses.MoveEndResponse;
+import es.ucm.fdi.tp.project6.network.responseclasses.MoveStartResponse;
 
 public class GameServer extends Controller implements GameObserver {
 
 	private int port;
 	private int numPlayers;
-	private int numOfConnectedPlayers;
+	private int numConnections;
 	private GameFactory gameFactory;
 	private List<Connection> clients;
+	private ControlGUI controlWindow;
 	volatile private ServerSocket server;
 	volatile private boolean stopped;
 	volatile boolean gameOver;
@@ -34,8 +41,9 @@ public class GameServer extends Controller implements GameObserver {
 		this.gameFactory = gameFactory;
 		this.stopped = false;
 		this.gameOver = false;
-		this.game.addObserver(this); // We add the game of the controller as an
+		this.game.addObserver(this);// We add the game of the controller as an
 		// observer to receive information (the server)
+		this.controlWindow = new ControlGUI();
 	}
 
 	public synchronized void makeMove(Player player) {
@@ -60,26 +68,31 @@ public class GameServer extends Controller implements GameObserver {
 	}
 
 	public void start() {
-		controlGUI() //No se si nosotros ya tenemos esta clase/metodo con otro nombre
-		// pero me suena que si, si puedes haz tu esto o dime que tengo que hacer porque no me queda muy claras las transparencias. 
+		controlWindow.controlGUI(); // Hay que crear y añadir el listener del
+									// stopServerButton, como no se si quieres
+									// usar un patron o no te lo dejo a ti para
+									// que lo hagas.
 		startServer();
 	}
 
 	private void startServer() {
-		server = new ServerSocket(port);
+		try {
+			server = new ServerSocket(port);
+		} catch (IOException e) {
+			controlWindow.log("Error creating the server" + e.getMessage());
+		}
 		stopped = false;
 
 		while (!stopped) {
 			try {
 				Socket s = new Socket();
 				s = server.accept();
-				// Aqui hay que poner un mensaje pero no se cual.
+				controlWindow.log("Connection with Client succed");
 				handleRequest(s);
 			} catch (IOException e) {
 				if (!stopped) {
-					log("error while waiting for a connection: "
+					controlWindow.log("error while waiting for a connection: "
 							+ e.getMessage());
-					// Alvaro No se hacer el logger.
 				}
 			}
 
@@ -87,37 +100,37 @@ public class GameServer extends Controller implements GameObserver {
 	}
 
 	private void handleRequest(Socket s) {
-		try{
+		try {
 			Connection c = new Connection(s);
 			Object clientRequest = c.getObject();
-			if(!(clientRequest instanceof String) && !((String) clientRequest).equalsIgnoreCase("Connect")){
+			if (!(clientRequest instanceof String)
+					&& !((String) clientRequest).equalsIgnoreCase("Connect")) {
 				c.sendObject(new GameError("Invalid Request"));
 				c.stop();
 				return;
 			}
-			if(numPlayers == numOfConnectedPlayers){
-				//Aqui hay que responder con un GameError the enough Clients o algo asi.
-			}
-			else{
-				numOfConnectedPlayers++;
+			if (numPlayers == numConnections) {
+				c.sendObject(new GameError("Number of Clients exceeded"));
+			} else {
+				numConnections++;
 				clients.add(c);
+				c.sendObject("OK");
 				c.sendObject(gameFactory);
-				c.sendObject(pieces.get(numOfConnectedPlayers-1));
+				c.sendObject(pieces.get(numConnections - 1));
 			}
-		
-			if(numPlayers == numOfConnectedPlayers){
+
+			if (numPlayers == numConnections) {
 				if(){//Si es la primera vez start sino restart.
-					//Podemos hacerlo con un boolean o un contador.
-					start();
-				}
-				else {
-					restart();
-				}
+				// Podemos hacerlo con un boolean o un contador.
+				start();
+				 }
+				 else {
+				 restart();
+				 }
 			}
-			
+
 			startClientListener(c);
-		}
-		catch (IOException | ClassNotFoundException e){
+		} catch (IOException | ClassNotFoundException e) {
 		}
 	}
 
@@ -140,10 +153,6 @@ public class GameServer extends Controller implements GameObserver {
 		}.start();
 	}
 
-	public interface Response extends java.io.Serializable {
-		public void run(GameObserver observer);
-	}
-
 	void forwardNotification(Response r) {
 		// en las transparencias pone call c.sendObject(r) for each client
 		// connection `c´, creo que es esto.
@@ -161,128 +170,25 @@ public class GameServer extends Controller implements GameObserver {
 		forwardNotification(new GameStartResponse(board, gameDesc, pieces, turn));
 	}
 
-	public class GameStartResponse implements Response {
-		private static final long serialVersionUID = 1L;
-		private Board board;
-		private String gameDesc;
-		private List<Piece> pieces;
-		private Piece turn;
-
-		public GameStartResponse(Board board, String gameDesc,
-				List<Piece> pieces, Piece turn) {
-			this.board = board;
-			this.gameDesc = gameDesc;
-			this.pieces = pieces;
-			this.turn = turn;
-		}
-
-		public void run(GameObserver observer) {
-			observer.onGameStart(board, gameDesc, pieces, turn);
-		}
-	}
-
 	public void onGameOver(Board board, State state, Piece winner) {
 		forwardNotification(new GameOverResponse(board, state, winner));
 		game.stop();
-	}
-
-	public class GameOverResponse implements Response {
-
-		private static final long serialVersionUID = 1L;
-		private Board board;
-		private State state;
-		private Piece winner;
-
-		public GameOverResponse(Board board, State state, Piece winner) {
-			this.board = board;
-			this.state = state;
-			this.winner = winner;
-		}
-
-		public void run(GameObserver observer) {
-			observer.onGameOver(board, state, winner);
-		}
-
 	}
 
 	public void onMoveStart(Board board, Piece turn) {
 		forwardNotification(new MoveStartResponse(board, turn));
 	}
 
-	public class MoveStartResponse implements Response {
-		private static final long serialVersionUID = 1L;
-		private Board board;
-		private Piece turn;
-
-		public MoveStartResponse(Board board, Piece turn) {
-			this.board = board;
-			this.turn = turn;
-		}
-
-		public void run(GameObserver observer) {
-			observer.onMoveStart(board, turn);
-		}
-
-	}
-
 	public void onMoveEnd(Board board, Piece turn, boolean success) {
 		forwardNotification(new MoveEndResponse(board, turn, success));
-	}
-
-	public class MoveEndResponse implements Response {
-		private static final long serialVersionUID = 1L;
-		private Board board;
-		private Piece turn;
-		private boolean success;
-
-		public MoveEndResponse(Board board, Piece turn, boolean success) {
-			this.board = board;
-			this.turn = turn;
-			this.success = success;
-		}
-
-		public void run(GameObserver observer) {
-			observer.onMoveEnd(board, turn, success);
-		}
-
 	}
 
 	public void onChangeTurn(Board board, Piece turn) {
 		forwardNotification(new ChangeTurnResponse(board, turn));
 	}
 
-	public class ChangeTurnResponse implements Response {
-
-		private static final long serialVersionUID = 1L;
-		private Board board;
-		private Piece turn;
-
-		public ChangeTurnResponse(Board board, Piece turn) {
-			this.board = board;
-			this.turn = turn;
-		}
-
-		public void run(GameObserver observer) {
-			observer.onChangeTurn(board, turn);
-		}
-	}
-
 	public void onError(String msg) {
 		forwardNotification(new ErrorResponse(msg));
-	}
-
-	public class ErrorResponse implements Response {
-
-		private static final long serialVersionUID = 1L;
-		private String msg;
-
-		public ErrorResponse(String msg) {
-			this.msg = msg;
-		}
-
-		public void run(GameObserver observer) {
-			observer.onError(msg);
-		}
 	}
 
 }

@@ -15,9 +15,8 @@ import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
-import es.ucm.fdi.tp.project6.network.GameServer.Response;
 
-public class GameClient extends Controller implements Observable<GameObserver>{
+public class GameClient extends Controller implements Observable<GameObserver> {
 
 	private String host;
 	private int port;
@@ -26,79 +25,81 @@ public class GameClient extends Controller implements Observable<GameObserver>{
 	private GameFactory gameFactory;
 	private Connection connectionToServer;
 	private boolean gameOver;
-	
-	
-	
+
 	public GameClient(String host, int port) throws Exception {
-		super(null,null);
+		super(null, null);
 		this.host = host;
 		this.port = port;
 		connect();
-		
+
 	}
 
 	private void connect() throws Exception {
 		connectionToServer = new Connection(new Socket(host, port));
 		connectionToServer.sendObject("Connect");
 		Object response = connectionToServer.getObject();
-		if(response instanceof Exception){
+		if (response instanceof Exception) {
 			throw (Exception) response;
 		}
-		try{
-			gameFactory =  (GameFactory) connectionToServer.getObject();
+		try {
+			gameFactory = (GameFactory) connectionToServer.getObject();
 			localPiece = (Piece) connectionToServer.getObject();
-		}
-		catch (Exception e){
+		} catch (Exception e) {
 			throw new GameError("Unknown server response: " + e.getMessage());
 		}
 	}
-	
-	public GameFactory getGameFactory(){
+
+	public GameFactory getGameFactory() {
 		return gameFactory;
 	}
-	
-	public Piece getPlayerPiece(){
+
+	public Piece getPlayerPiece() {
 		return localPiece;
 	}
 
 	public void addObserver(GameObserver o) {
 		this.observers.add(o);
 	}
+
 	public void removeObserver(GameObserver o) {
 		this.observers.remove(o);
 	}
-	
-	public void makeMove(Player p){
+
+	public void makeMove(Player p) {
 		forwardCommand(new PlayCommand(p));
 	}
-	public void stop(){
+
+	public void stop() {
 		forwardCommand(new QuitCommand());
 	}
-	public void restart(){
+
+	public void restart() {
 		forwardCommand(new RestartCommand());
 	}
-	private void forwardCommand (Command cmd){
-		if(gameOver==false){
+
+	private void forwardCommand(Command cmd) {
+		if (gameOver == false) {
 			try {
 				connectionToServer.sendObject(cmd);
 			} catch (IOException e) {
 			}
 		}
 	}
-	public void start(){
-	
-		this.observers.add(); //No se cuales son los parametros
-		gameOver=false;
-		while(!gameOver){
-			try{
+
+	public void start() {
+
+		this.observers.add(); // No se cuales son los parametros, ni que
+								// significa lo que viene en las transparencias.
+		gameOver = false;
+		while (!gameOver) {
+			try {
 				Response res = (Response) connectionToServer.getObject();
-				for(GameObserver o: observers){
+				for (GameObserver o : observers) {
 					res.run(o);
 				}
-			}
-			catch (ClassNotFoundException |IOException e){
+			} catch (ClassNotFoundException | IOException e) {
 			}
 		}
-		
+
 	}
 }
