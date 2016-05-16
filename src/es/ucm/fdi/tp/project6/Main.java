@@ -27,6 +27,8 @@ import es.ucm.fdi.tp.project6.factories.AdvancedTTTFactoryExt;
 import es.ucm.fdi.tp.project6.factories.AtaxxFactoryExt;
 import es.ucm.fdi.tp.project6.factories.ConnectNFactoryExt;
 import es.ucm.fdi.tp.project6.factories.TicTacToeFactoryExt;
+import es.ucm.fdi.tp.project6.network.GameClient;
+import es.ucm.fdi.tp.project6.network.GameServer;
 
 /**
  * This is the class with the main method for the board games application.
@@ -98,9 +100,8 @@ public class Main {
 		 * See constructor below. If you have doubts, look for information about
 		 * enumerates inner classes in Java.
 		 */
-		CONNECTN("cn", "ConnectN"), TicTacToe("ttt",
-				"Tic-Tac-Toe"), AdvancedTicTacToe("attt",
-						"Advanced Tic-Tac-Toe"), ATAXX("ataxx", "Ataxx");
+		CONNECTN("cn", "ConnectN"), TicTacToe("ttt", "Tic-Tac-Toe"), AdvancedTicTacToe(
+				"attt", "Advanced Tic-Tac-Toe"), ATAXX("ataxx", "Ataxx");
 
 		private String id;
 		private String desc;
@@ -162,10 +163,10 @@ public class Main {
 			return id;
 		}
 	}
-	
+
 	private enum AlgorithmForAIPlayer {
-		NONE("none", "No AI Algorithm"), MINMAX("minmax", "MinMax"), MINMAXAB("minmaxab",
-				"MinMax with Alhpa-Beta Prunning");
+		NONE("none", "No AI Algorithm"), MINMAX("minmax", "MinMax"), MINMAXAB(
+				"minmaxab", "MinMax with Alhpa-Beta Prunning");
 
 		private String id;
 		private String desc;
@@ -213,7 +214,7 @@ public class Main {
 	 * Modo de juego por defecto. Para probar errores, será un jugador manual.
 	 */
 	final private static PlayerMode DEFAULT_PLAYERMODE = PlayerMode.MANUAL;
-	
+
 	final private static AlgorithmForAIPlayer DEFAULT_AIALG = AlgorithmForAIPlayer.NONE;
 
 	public static final String OBSTACLE = "*";
@@ -307,7 +308,7 @@ public class Main {
 	 * utiliza, por lo que siempre es {@code null}.
 	 */
 	private static AIAlgorithm aiPlayerAlg;
-	
+
 	private static Integer minmaxTreeDepth;
 
 	/**
@@ -319,6 +320,36 @@ public class Main {
 	 * se incluye la opción -o.
 	 */
 	private static Integer obstacles;
+
+	private static String serverHost;
+
+	private static int serverPort;
+
+	private enum applicationMode {
+		NORMAL("normal", "No Servers and Clients"), CLIENT("cliente",
+				"Client version"), SERVER("server", "Server version");
+
+		private String id;
+		private String desc;
+
+		applicationMode(String id, String desc) {
+			this.id = id;
+			this.desc = desc;
+		}
+
+		public String getId() {
+			return id;
+		}
+
+		public String getDesc() {
+			return desc;
+		}
+
+		@Override
+		public String toString() {
+			return desc;
+		}
+	}
 
 	/*-----METHODS-----*/
 
@@ -399,14 +430,15 @@ public class Main {
 		//
 	}
 
-	
 	private static Option constructMinMaxDepathOption() {
-		Option opt = new Option("md", "minmax-depth", true, "The maximum depth of the MinMax tree");
+		Option opt = new Option("md", "minmax-depth", true,
+				"The maximum depth of the MinMax tree");
 		opt.setArgName("number");
 		return opt;
 	}
-	
-	private static void parseMixMaxDepthOption(CommandLine line) throws ParseException {
+
+	private static void parseMixMaxDepthOption(CommandLine line)
+			throws ParseException {
 		String depthVal = line.getOptionValue("md");
 		minmaxTreeDepth = null;
 
@@ -414,11 +446,12 @@ public class Main {
 			try {
 				minmaxTreeDepth = Integer.parseInt(depthVal);
 			} catch (NumberFormatException e) {
-				throw new ParseException("Invalid value for the MinMax depth '" + depthVal + "'");
+				throw new ParseException("Invalid value for the MinMax depth '"
+						+ depthVal + "'");
 			}
 		}
 	}
-	
+
 	private static Option constructAIAlgOption() {
 		String optionInfo = "The AI algorithm to use ( ";
 		for (AlgorithmForAIPlayer alg : AlgorithmForAIPlayer.values()) {
@@ -429,8 +462,9 @@ public class Main {
 		opt.setArgName("algorithm for ai player");
 		return opt;
 	}
-	
-	private static void parseAIAlgOption(CommandLine line) throws ParseException {
+
+	private static void parseAIAlgOption(CommandLine line)
+			throws ParseException {
 		String aialg = line.getOptionValue("aialg", DEFAULT_AIALG.getId());
 
 		AlgorithmForAIPlayer selectedAlg = null;
@@ -447,16 +481,19 @@ public class Main {
 
 		switch (selectedAlg) {
 		case MINMAX:
-			aiPlayerAlg = minmaxTreeDepth == null ? new MinMax(false) : new MinMax(minmaxTreeDepth, false);
+			aiPlayerAlg = minmaxTreeDepth == null ? new MinMax(false)
+					: new MinMax(minmaxTreeDepth, false);
 			break;
 		case MINMAXAB:
-			aiPlayerAlg = minmaxTreeDepth == null ? new MinMax() : new MinMax(minmaxTreeDepth);
+			aiPlayerAlg = minmaxTreeDepth == null ? new MinMax() : new MinMax(
+					minmaxTreeDepth);
 			break;
 		case NONE:
 			aiPlayerAlg = null;
 			break;
 		}
 	}
+
 	/**
 	 * Builds the multiview (-m or --multiviews) CLI option.
 	 * 
@@ -520,8 +557,7 @@ public class Main {
 	 *             If an invalid value is provided (the valid values are those
 	 *             of {@link ViewInfo}.
 	 */
-	private static void parseViewOption(CommandLine line)
-			throws ParseException {
+	private static void parseViewOption(CommandLine line) throws ParseException {
 		String viewVal = line.getOptionValue("v", DEFAULT_VIEW.getId());
 		// view type
 		for (ViewInfo v : ViewInfo.values()) {
@@ -611,12 +647,12 @@ public class Main {
 					if (selectedMode != null) {
 						playerModes.add(selectedMode);
 					} else {
-						throw new ParseException(
-								"Invalid player mode in '" + player + "'");
+						throw new ParseException("Invalid player mode in '"
+								+ player + "'");
 					}
 				} else {
-					throw new ParseException(
-							"Invalid player information '" + player + "'");
+					throw new ParseException("Invalid player information '"
+							+ player + "'");
 				}
 			}
 		}
@@ -665,8 +701,7 @@ public class Main {
 	 *             Si se proporciona un valor invalido (Los valores validos son
 	 *             los de {@link GameInfo}).
 	 */
-	private static void parseGameOption(CommandLine line)
-			throws ParseException {
+	private static void parseGameOption(CommandLine line) throws ParseException {
 		String gameVal = line.getOptionValue("g", DEFAULT_GAME.getId());
 		GameInfo selectedGame = null;
 
@@ -767,7 +802,10 @@ public class Main {
 	 *         Objeto {@link Option} de esta opcion.
 	 */
 	private static Option constructDimensionOption() {
-		return new Option("d", "dim", true,
+		return new Option(
+				"d",
+				"dim",
+				true,
 				"The board size (if allowed by the selected game). It must has the form ROWSxCOLS.");
 	}
 
@@ -835,8 +873,7 @@ public class Main {
 	 *            CLI {@link Options} object to print the usage information.
 	 * 
 	 */
-	private static void parseHelpOption(CommandLine line,
-			Options cmdLineOptions) {
+	private static void parseHelpOption(CommandLine line, Options cmdLineOptions) {
 		if (line.hasOption("h")) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp(Main.class.getCanonicalName(), cmdLineOptions,
@@ -858,8 +895,8 @@ public class Main {
 			try {
 				obstacles = Integer.parseInt(obs);
 			} catch (NumberFormatException e) {
-				throw new ParseException(
-						"Invalid number of obstacles:" + obstacles);
+				throw new ParseException("Invalid number of obstacles:"
+						+ obstacles);
 			}
 		}
 	}
@@ -946,7 +983,8 @@ public class Main {
 			gameFactory.createConsoleView(g, c);
 			break;
 		case WINDOW:
-			c = new SwingController(g, pieces, gameFactory.createRandomPlayer(),
+			c = new SwingController(g, pieces,
+					gameFactory.createRandomPlayer(),
 					gameFactory.createAIPlayer(aiPlayerAlg));
 
 			if (!multiviews) {
@@ -979,33 +1017,22 @@ public class Main {
 
 	public static void main(String[] args) {
 		parseArgs(args);
-		//switch(applicationMode){
-		//case NORMAL:
-			startGame();
-			//break;
-		//case CLIENT:
-			//startClient();
-			//break;
-		//case SERVER:
-			//startServer();
-			//break;
-		//}
+		// switch (applicationMode) { No entiendo porque no me coge el enum del
+		// applicationMode que he hecho arriba
+		// case NORMAL:
+		startGame();
+		// break;
+		/*
+		 * case CLIENT: startClient(); break; case SERVER: startServer(); break;
+		 * }
+		 */
 	}
 	/*
-	private static void startServer(){
-		GameServer c = new GameServer(gameFactory, pieces, serverPort);
-		c.start();
-	}
-	private static void startClient(){
-		try{
-			GameClient c = new GameClient(serverHost, serverPort);
-			gameFactory = c.getGameFactory();
-			gameFactory.createSwingView(c,c,c.getPlayerPiece());
-			c.start();
-		}
-		catch (Exception e){
-		 System.err.println(e);	
-		}
-	}
-	*/
+	 * private static void startServer(){ GameServer c = new
+	 * GameServer(gameFactory, pieces, serverPort); c.start(); } private static
+	 * void startClient(){ try{ GameClient c = new GameClient(serverHost,
+	 * serverPort); gameFactory = c.getGameFactory();
+	 * gameFactory.createSwingView(c,c,c.getPlayerPiece()); c.start(); } catch
+	 * (Exception e){ System.err.println(e); } }
+	 */
 }

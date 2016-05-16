@@ -306,8 +306,6 @@ public class AtaxxRules implements GameRules {
 			maxOfOtherPieces = Math.max(x, maxOfOtherPieces);
 		}
 		
-		System.out.println(lossCoefficient);
-		
 		if (ourPieces - lossCoefficient == 0)
 			return -1;
 		else if (gainCoefficient - maxOfOtherPieces == 0)
