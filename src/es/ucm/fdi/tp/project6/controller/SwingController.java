@@ -34,8 +34,10 @@ public class SwingController extends Controller {
 
 	private void initializePiecePlayersMap(List<Piece> pieces) {
 		players = new HashMap<Piece, String>();
-		for (int i = 0; i < pieces.size(); i++) {
-			players.put(pieces.get(i), this.playerModesStringArray[MANUAL]);
+		if (pieces != null) {
+			for (int i = 0; i < pieces.size(); i++) {
+				players.put(pieces.get(i), this.playerModesStringArray[MANUAL]);
+			}
 		}
 	}
 

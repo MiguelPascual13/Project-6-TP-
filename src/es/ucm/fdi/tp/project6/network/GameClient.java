@@ -2,6 +2,7 @@ package es.ucm.fdi.tp.project6.network;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 import es.ucm.fdi.tp.basecode.bgame.control.GameFactory;
@@ -27,9 +28,10 @@ public class GameClient extends SwingController implements Observable<GameObserv
 	private boolean gameOver;
 
 	public GameClient(String host, int port) throws Exception {
-		super(null, null, null, null);
+		super(null,null, null, null);
 		this.host = host;
 		this.port = port;
+		this.observers = new ArrayList<GameObserver>();
 		connect();
 
 	}
