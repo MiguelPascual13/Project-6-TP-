@@ -217,7 +217,14 @@ public class Main {
 
 	final private static AlgorithmForAIPlayer DEFAULT_AIALG = AlgorithmForAIPlayer.NONE;
 
+	final private static ApplicationMode DEFAULT_APPLICATIONMODE = ApplicationMode.NORMAL;
+
+	final private static String DEFAULT_SERVERHOST = "localhost";
+
+	final private static int DEFAULT_SERVERPORT = 2000;
+
 	public static final String OBSTACLE = "*";
+
 	public static final int PLAYER_MODES_NUMBER = 3;
 
 	/*-----ATTRIBUTES-----*/
@@ -328,7 +335,7 @@ public class Main {
 	private static ApplicationMode applicationMode;
 
 	enum ApplicationMode {
-		NORMAL("normal", "No Servers and Clients"), CLIENT("cliente",
+		NORMAL("normal", "No Servers and Clients"), CLIENT("client",
 				"Client version"), SERVER("server", "Server version");
 
 		private String id;
@@ -390,6 +397,9 @@ public class Main {
 			parsePlayersOptions(line);
 			parseMixMaxDepthOption(line);
 			parseAIAlgOption(line);
+			parseServerClientOption(line);
+			parseServerHostOption(line);
+			parseServerPortOption(line);
 
 			// if there are some remaining arguments, then something wrong is
 			// provided in the command line!
@@ -410,6 +420,77 @@ public class Main {
 
 	}
 
+	private static void parseServerPortOption(CommandLine line)
+			throws ParseException {
+		String port = line.getOptionValue("sp");
+
+		if (port != null) {
+			if (applicationMode != ApplicationMode.NORMAL) {
+				try {
+					serverPort = Integer.parseInt(port);
+				} catch (NumberFormatException e) {
+					throw new ParseException(
+							"Invalid value for the ServerPort (it need to be specified with client or server and the port must be an integer)'"
+									+ port + "'");
+				}
+			}
+		} else {
+			serverPort = DEFAULT_SERVERPORT;
+		}
+	}
+
+	private static void parseServerHostOption(CommandLine line)
+			throws ParseException {
+		String host = line.getOptionValue("sh");
+
+		if (host != null) {
+			if (applicationMode != ApplicationMode.NORMAL) {
+				try {
+					serverHost = host;
+				} catch (NumberFormatException e) {
+					throw new ParseException(
+							"Invalid value for the ServerHost (it need to be specified with client and the host must be a string)'"
+									+ host + "'");
+				}
+			}
+		} else {
+			serverHost = DEFAULT_SERVERHOST;
+		}
+
+	}
+
+	private static void parseServerClientOption(CommandLine line)
+			throws ParseException {
+		String serverClient = line.getOptionValue("am",
+				DEFAULT_APPLICATIONMODE.getId());
+		serverClient.toUpperCase();
+
+		ApplicationMode selectedMode = null;
+		for (ApplicationMode a : ApplicationMode.values()) {
+			if (a.getId().equals(serverClient)) {
+				selectedMode = a;
+				break;
+			}
+		}
+
+		if (selectedMode == null) {
+			throw new ParseException("Uknown Application Mode '" + serverClient
+					+ "'");
+		}
+
+		switch (selectedMode) {
+		case NORMAL:
+			applicationMode = ApplicationMode.NORMAL;
+			break;
+		case SERVER:
+			applicationMode = ApplicationMode.SERVER;
+			break;
+		case CLIENT:
+			applicationMode = ApplicationMode.CLIENT;
+			break;
+		}
+	}
+
 	/**
 	 * Auxiliary function of {@link parseArgs}
 	 * 
@@ -427,9 +508,42 @@ public class Main {
 		cmdLineOptions.addOption(constructMinMaxDepathOption()); // -md or
 		// --minmax-depth
 		cmdLineOptions.addOption(constructAIAlgOption()); // -aialg ...
-
+		cmdLineOptions.addOption(constructServerClientOption());
+		cmdLineOptions.addOption(constructPortOption());
+		cmdLineOptions.addOption(constructHostOption());
 		// parse the command line as provided in args
 		//
+	}
+
+	private static Option constructHostOption() {
+		Option opt = new Option("sh", "server-host", true,
+				"The name or IP of the machine where the sever is working. By default, "
+						+ DEFAULT_SERVERHOST);
+		opt.setArgName("String");
+		return opt;
+	}
+
+	private static Option constructPortOption() {
+		Option opt = new Option(
+				"sp",
+				"server-port",
+				true,
+				"The number of the Port where the Server is connectd or the Client needs to connect. By default, "
+						+ DEFAULT_SERVERPORT);
+		opt.setArgName("number");
+		return opt;
+	}
+
+	private static Option constructServerClientOption() {
+		String optionInfo = "The Application Mode to use ( ";
+		for (ApplicationMode mod : ApplicationMode.values()) {
+			optionInfo += mod.getId() + " [for " + mod.getDesc() + "] ";
+		}
+		optionInfo += "). By defualt, " + DEFAULT_APPLICATIONMODE;
+		Option opt = new Option("am", "app-mode", true, optionInfo);
+		opt.setArgName("Server/Client or Normal");
+		return opt;
+
 	}
 
 	private static Option constructMinMaxDepathOption() {
@@ -452,6 +566,7 @@ public class Main {
 						+ depthVal + "'");
 			}
 		}
+
 	}
 
 	private static Option constructAIAlgOption() {

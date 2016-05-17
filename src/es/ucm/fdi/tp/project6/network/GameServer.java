@@ -3,6 +3,7 @@ package es.ucm.fdi.tp.project6.network;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
@@ -15,6 +16,7 @@ import es.ucm.fdi.tp.basecode.bgame.model.Game.State;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
+import es.ucm.fdi.tp.project6.network.ControlGUI.StopServerButtonListener;
 import es.ucm.fdi.tp.project6.network.responseclasses.ChangeTurnResponse;
 import es.ucm.fdi.tp.project6.network.responseclasses.ErrorResponse;
 import es.ucm.fdi.tp.project6.network.responseclasses.GameOverResponse;
@@ -30,6 +32,7 @@ public class GameServer extends Controller implements GameObserver {
 	private GameFactory gameFactory;
 	private List<Connection> clients;
 	private ControlGUI controlWindow;
+	private boolean isTheFirstTime;
 	volatile private ServerSocket server;
 	volatile private boolean stopped;
 	volatile boolean gameOver;
@@ -41,9 +44,11 @@ public class GameServer extends Controller implements GameObserver {
 		this.gameFactory = gameFactory;
 		this.stopped = false;
 		this.gameOver = false;
+		this.clients = new ArrayList<Connection>();
 		this.game.addObserver(this);// We add the game of the controller as an
 		// observer to receive information (the server)
 		this.controlWindow = new ControlGUI();
+		this.isTheFirstTime = true;
 	}
 
 	public synchronized void makeMove(Player player) {
@@ -68,11 +73,22 @@ public class GameServer extends Controller implements GameObserver {
 	}
 
 	public void start() {
-		controlWindow.controlGUI(); // Hay que crear y añadir el listener del
-									// stopServerButton, como no se si quieres
-									// usar un patron o no te lo dejo a ti para
-									// que lo hagas.
+		controlWindow.controlGUI(getStopServerButtonListener()); 
 		startServer();
+	}
+	
+	public StopServerButtonListener getStopServerButtonListener(){
+		return new StopServerButtonListener(){
+			public void StopServerButtonClicked() {
+				try {
+					//Aqui hay que cerrar los clientes?????
+					server.close();
+					controlWindow.out();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		};
 	}
 
 	private void startServer() {
@@ -120,17 +136,18 @@ public class GameServer extends Controller implements GameObserver {
 			}
 
 			if (numPlayers == numConnections) {
-				if(){//Si es la primera vez start sino restart.
-				// Podemos hacerlo con un boolean o un contador.
-				start();
+				if(isTheFirstTime){
+				game.start(pieces);
+				isTheFirstTime= false;
 				 }
 				 else {
-				 restart();
+				 game.restart();
 				 }
 			}
 
 			startClientListener(c);
 		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -160,7 +177,7 @@ public class GameServer extends Controller implements GameObserver {
 			try {
 				clients.get(i).sendObject(r);
 			} catch (IOException e) {
-				// No se si hace falta tratarlo.
+				e.printStackTrace();
 			}
 		}
 	}

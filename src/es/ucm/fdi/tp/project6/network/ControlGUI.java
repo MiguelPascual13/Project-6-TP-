@@ -1,5 +1,6 @@
 package es.ucm.fdi.tp.project6.network;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +16,7 @@ import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 
 public class ControlGUI {
 	private JTextArea textArea;
+	private JFrame window;
 
 	protected void controlGUI(StopServerButtonListener stopServerButtonListener) {
 		try {
@@ -34,7 +36,7 @@ public class ControlGUI {
 	}
 
 	private void constructGUI(StopServerButtonListener stopServerButtonListener) {
-		JFrame window = new JFrame("Game Server");
+		window = new JFrame("Game Server");
 		this.textArea = new JTextArea();
 		this.textArea.setEditable(false);
 		JScrollPane scrollPane = new JScrollPane(this.textArea);
@@ -44,8 +46,9 @@ public class ControlGUI {
 				stopServerButtonListener.StopServerButtonClicked();
 			}
 		});
-		window.add(scrollPane);
-		window.add(stopServerButton);
+		window.setLayout(new BorderLayout());
+		window.add(scrollPane, BorderLayout.CENTER);
+		window.add(stopServerButton, BorderLayout.EAST);
 		
 		window.setPreferredSize(new Dimension(600,600));
 		window.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -60,5 +63,9 @@ public class ControlGUI {
 				textArea.setCaretPosition(textArea.getDocument().getLength());
 			}
 		});
+	}
+
+	public void out() {
+		window.dispose();
 	}
 }

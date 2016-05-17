@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 
-import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.GameFactory;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
 import es.ucm.fdi.tp.basecode.bgame.control.commands.Command;
@@ -15,8 +14,9 @@ import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
+import es.ucm.fdi.tp.project6.controller.SwingController;
 
-public class GameClient extends Controller implements Observable<GameObserver> {
+public class GameClient extends SwingController implements Observable<GameObserver> {
 
 	private String host;
 	private int port;
@@ -27,7 +27,7 @@ public class GameClient extends Controller implements Observable<GameObserver> {
 	private boolean gameOver;
 
 	public GameClient(String host, int port) throws Exception {
-		super(null, null);
+		super(null, null, null, null);
 		this.host = host;
 		this.port = port;
 		connect();
@@ -82,13 +82,14 @@ public class GameClient extends Controller implements Observable<GameObserver> {
 			try {
 				connectionToServer.sendObject(cmd);
 			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
 
 	public void start() {
 
-		this.observers.add(); // No se cuales son los parametros, ni que
+		//this.observers.add(); // No se cuales son los parametros, ni que
 								// significa lo que viene en las transparencias.
 		gameOver = false;
 		while (!gameOver) {
@@ -98,6 +99,7 @@ public class GameClient extends Controller implements Observable<GameObserver> {
 					res.run(o);
 				}
 			} catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
 			}
 		}
 
