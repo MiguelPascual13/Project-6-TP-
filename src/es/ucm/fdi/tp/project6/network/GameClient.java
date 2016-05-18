@@ -109,7 +109,6 @@ public class GameClient extends SwingController implements
 				}
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
-				gameOver=true;
 			}
 		}
 	}

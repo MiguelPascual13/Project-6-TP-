@@ -154,7 +154,6 @@ public class GameServer extends SwingController implements GameObserver {
 					game.restart();
 				}
 			}
-
 			startClientListener(c);
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
