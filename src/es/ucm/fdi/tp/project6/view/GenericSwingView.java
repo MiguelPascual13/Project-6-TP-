@@ -100,7 +100,7 @@ public class GenericSwingView implements GameObserver {
 				this.getCellClickedListener(board));
 
 		setGUITitle(gameDesc);
-		checkForDisablingButtons();
+		checkForDisablingButtons(); //AQUI SE PRODUCE EL FALLO PERO NO LO PROVOCA ESTO, SE PROVOCA ANTES AL CREAR EL FACTORY.
 		update(board);
 		gui.appendToStatusMessagePanel(
 				startingMessage + "'" + gameDesc + "'\n");
@@ -317,7 +317,7 @@ public class GenericSwingView implements GameObserver {
 			public void run() {
 				gui.setVisible(true);
 			}
-		});
+		}); 
 	}
 
 	private void appendChangeTurnMessage() {

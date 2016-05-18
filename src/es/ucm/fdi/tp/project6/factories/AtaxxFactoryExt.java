@@ -1,7 +1,12 @@
 package es.ucm.fdi.tp.project6.factories;
 
+import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.SwingUtilities;
+
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
+import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
@@ -34,10 +39,21 @@ public class AtaxxFactoryExt extends AtaxxFactory {
 	 */
 	@Override
 	public void createSwingView(final Observable<GameObserver> g,
-			final Controller c, final Piece viewPiece, Player random,
-			Player ai) {
+			final Controller c, final Piece viewPiece, Player random, Player ai) {
 		moveController = new AtaxxMoveController();
-		new GenericSwingView(g, (SwingController) (c), viewPiece,
-				moveController, random, ai);
+		try {
+			SwingUtilities.invokeAndWait(new Runnable() {
+
+				@Override
+				public void run() {
+					new GenericSwingView(g, (SwingController) (c), viewPiece,
+							moveController, random, ai);
+				}
+			});
+
+		} catch (InterruptedException | InvocationTargetException e) {
+			throw new GameError("Error while creating the SwingView");
+		}
+
 	}
 }

@@ -6,16 +6,17 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.GameFactory;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
 import es.ucm.fdi.tp.basecode.bgame.control.commands.Command;
+import es.ucm.fdi.tp.basecode.bgame.model.AIAlgorithm;
 import es.ucm.fdi.tp.basecode.bgame.model.Board;
 import es.ucm.fdi.tp.basecode.bgame.model.Game;
 import es.ucm.fdi.tp.basecode.bgame.model.Game.State;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
+import es.ucm.fdi.tp.project6.controller.SwingController;
 import es.ucm.fdi.tp.project6.network.ControlGUI.StopServerButtonListener;
 import es.ucm.fdi.tp.project6.network.responseclasses.ChangeTurnResponse;
 import es.ucm.fdi.tp.project6.network.responseclasses.ErrorResponse;
@@ -24,7 +25,7 @@ import es.ucm.fdi.tp.project6.network.responseclasses.GameStartResponse;
 import es.ucm.fdi.tp.project6.network.responseclasses.MoveEndResponse;
 import es.ucm.fdi.tp.project6.network.responseclasses.MoveStartResponse;
 
-public class GameServer extends Controller implements GameObserver {
+public class GameServer extends SwingController implements GameObserver {
 
 	private int port;
 	private int numPlayers;
@@ -35,10 +36,13 @@ public class GameServer extends Controller implements GameObserver {
 	private boolean isTheFirstTime;
 	volatile private ServerSocket server;
 	volatile private boolean stopped;
+
 	volatile boolean gameOver;
 
-	public GameServer(GameFactory gameFactory, List<Piece> pieces, int port) {
-		super(new Game(gameFactory.gameRules()), pieces);
+	public GameServer(GameFactory gameFactory, List<Piece> pieces, int port,
+			AIAlgorithm aiPlayerAlg) {
+		super(new Game(gameFactory.gameRules()), pieces, gameFactory
+				.createRandomPlayer(), gameFactory.createAIPlayer(aiPlayerAlg));
 		this.port = port;
 		this.numPlayers = pieces.size();
 		this.gameFactory = gameFactory;
@@ -55,6 +59,7 @@ public class GameServer extends Controller implements GameObserver {
 		try {
 			super.makeMove(player);
 		} catch (GameError e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -62,6 +67,7 @@ public class GameServer extends Controller implements GameObserver {
 		try {
 			super.stop();
 		} catch (GameError e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -69,21 +75,25 @@ public class GameServer extends Controller implements GameObserver {
 		try {
 			super.restart();
 		} catch (GameError e) {
+			e.printStackTrace();
 		}
 	}
 
 	public void start() {
-		controlWindow.controlGUI(getStopServerButtonListener()); 
+		controlWindow.controlGUI(getStopServerButtonListener());
 		startServer();
 	}
-	
-	public StopServerButtonListener getStopServerButtonListener(){
-		return new StopServerButtonListener(){
+
+	public StopServerButtonListener getStopServerButtonListener() {
+		return new StopServerButtonListener() {
 			public void StopServerButtonClicked() {
 				try {
-					//Aqui hay que cerrar los clientes?????
-					server.close();
+					stopped = true;
+					for(int i=0; i<clients.size(); i++){
+						clients.get(i).stop();
+					}
 					controlWindow.out();
+					server.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -103,7 +113,7 @@ public class GameServer extends Controller implements GameObserver {
 			try {
 				Socket s = new Socket();
 				s = server.accept();
-				controlWindow.log("Connection with Client succed");
+				controlWindow.log("Connection with Client succed \n");
 				handleRequest(s);
 			} catch (IOException e) {
 				if (!stopped) {
@@ -136,13 +146,13 @@ public class GameServer extends Controller implements GameObserver {
 			}
 
 			if (numPlayers == numConnections) {
-				if(isTheFirstTime){
-				game.start(pieces);
-				isTheFirstTime= false;
-				 }
-				 else {
-				 game.restart();
-				 }
+				if (isTheFirstTime) {
+					game.start(pieces);
+					controlWindow.log("The game starts now!!! \n");
+					isTheFirstTime = false;
+				} else {
+					game.restart();
+				}
 			}
 
 			startClientListener(c);
@@ -153,7 +163,7 @@ public class GameServer extends Controller implements GameObserver {
 
 	private void startClientListener(Connection c) {
 		gameOver = false;
-		new Thread() {
+		Thread t = new Thread() {
 			public void run() {
 				while (!stopped && !gameOver) {
 					try {
@@ -163,16 +173,17 @@ public class GameServer extends Controller implements GameObserver {
 					} catch (ClassNotFoundException | IOException e) {
 						if (!stopped && !gameOver) {
 							game.stop();
+							stopped = true;
+							e.printStackTrace();
 						}
 					}
 				}
 			}
-		}.start();
+		};
+		t.start();
 	}
 
 	void forwardNotification(Response r) {
-		// en las transparencias pone call c.sendObject(r) for each client
-		// connection `c´, creo que es esto.
 		for (int i = 0; i < clients.size(); i++) {
 			try {
 				clients.get(i).sendObject(r);

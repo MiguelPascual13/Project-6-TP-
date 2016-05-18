@@ -1148,13 +1148,14 @@ public class Main {
 	}
 
 	private static void startServer() {
-		GameServer c = new GameServer(gameFactory, pieces, serverPort);
+		GameServer c = new GameServer(gameFactory, pieces, serverPort,
+				aiPlayerAlg);
 		c.start();
 	}
 
 	private static void startClient() {
 		try {
-			GameClient c = new GameClient(serverHost, serverPort);
+			GameClient c = new GameClient(serverHost, serverPort, aiPlayerAlg);
 			gameFactory = c.getGameFactory();
 			gameFactory.createSwingView(c, c, c.getPlayerPiece(),
 					gameFactory.createRandomPlayer(),
@@ -1162,6 +1163,7 @@ public class Main {
 			c.start();
 		} catch (Exception e) {
 			System.err.println(e);
+			e.printStackTrace();
 		}
 	}
 }

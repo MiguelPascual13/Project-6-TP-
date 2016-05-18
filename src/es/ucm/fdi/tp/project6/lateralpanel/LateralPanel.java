@@ -69,7 +69,9 @@ public class LateralPanel extends JPanel {
 	}
 
 	public void disableAutomaticMoves(boolean disable) {
-		this.automaticMovesPanel.disablePanel(disable);
+		if (automaticMovesPanel != null) {
+			this.automaticMovesPanel.disablePanel(disable);
+		}
 	}
 
 	private boolean buildPlayerModesPanel(Piece pieces[], Piece viewPiece,

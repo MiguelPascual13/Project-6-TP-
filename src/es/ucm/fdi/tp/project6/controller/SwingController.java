@@ -16,6 +16,8 @@ import es.ucm.fdi.tp.project6.Main;
 public class SwingController extends Controller {
 
 	private int availablePlayerModes = 1;
+	private Player randomPlayer;
+	private Player aiPlayer;
 
 	// cambiar por un enum.
 	public static final int MANUAL = 0;
@@ -28,8 +30,19 @@ public class SwingController extends Controller {
 	public SwingController(Game game, List<Piece> pieces, Player randomPlayer,
 			Player aiPlayer) {
 		super(game, pieces);
-		this.initializePlayerModesStringArray(randomPlayer, aiPlayer);
+		this.randomPlayer=randomPlayer;
+		this.aiPlayer = aiPlayer;
+		this.initializePlayerModesStringArray(this.randomPlayer, this.aiPlayer);
 		this.initializePiecePlayersMap(pieces);
+	}
+	
+	public void setRandomPlayer(Player randomPlayer){
+		this.randomPlayer = randomPlayer;
+		this.initializePlayerModesStringArray(this.randomPlayer, this.aiPlayer);
+	}
+	public void setAiPlayer(Player aiPlayer){
+		this.aiPlayer = aiPlayer;
+		this.initializePlayerModesStringArray(this.randomPlayer, this.aiPlayer);
 	}
 
 	private void initializePiecePlayersMap(List<Piece> pieces) {
