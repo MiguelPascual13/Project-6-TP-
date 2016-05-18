@@ -1157,7 +1157,7 @@ public class Main {
 		try {
 			GameClient c = new GameClient(serverHost, serverPort, aiPlayerAlg);
 			gameFactory = c.getGameFactory();
-			gameFactory.createSwingView(c, c, c.getPlayerPiece(),
+			gameFactory.createSwingView(c, c.getSwingController(), c.getPlayerPiece(),
 					gameFactory.createRandomPlayer(),
 					gameFactory.createAIPlayer(aiPlayerAlg));
 			c.start();

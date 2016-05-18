@@ -11,38 +11,62 @@ import es.ucm.fdi.tp.basecode.bgame.control.commands.Command;
 import es.ucm.fdi.tp.basecode.bgame.control.commands.PlayCommand;
 import es.ucm.fdi.tp.basecode.bgame.control.commands.QuitCommand;
 import es.ucm.fdi.tp.basecode.bgame.control.commands.RestartCommand;
-import es.ucm.fdi.tp.basecode.bgame.model.Board;
-import es.ucm.fdi.tp.basecode.bgame.model.Game.State;
 import es.ucm.fdi.tp.basecode.bgame.model.AIAlgorithm;
+import es.ucm.fdi.tp.basecode.bgame.model.Board;
+import es.ucm.fdi.tp.basecode.bgame.model.Game;
+import es.ucm.fdi.tp.basecode.bgame.model.Game.State;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 import es.ucm.fdi.tp.project6.controller.SwingController;
 
-public class GameClient extends SwingController implements
-		Observable<GameObserver> {
+public class GameClient implements Observable<GameObserver> {
+
+	private SwingController controller;
+	private List<Piece> pieces;
 
 	private String host;
 	private int port;
+
 	private List<GameObserver> observers;
+
 	private Piece localPiece;
 	private GameFactory gameFactory;
+
 	private Connection connectionToServer;
+
 	private boolean gameOver;
 	private AIAlgorithm aiPlayerAlg;
 
-	public GameClient(String host, int port, AIAlgorithm aiPlayerAlg) throws Exception {
-		super(null, null, null, null);//El random y el AI player no hay que pasarlos a null, pensar como pasarlos. 
-		this.aiPlayerAlg=aiPlayerAlg;
+	public GameClient(String host, int port, AIAlgorithm aiPlayerAlg)
+			throws Exception {
+		/*
+		 * En mi opinión podríamos arreglarlo casi todo si hicieramos que en vez
+		 * de ser un controlador, GameClient tubiera un controlador, de tal
+		 * manera que lo contruyeramos sólo tienendo ya todo lo necesario
+		 */
+
 		this.host = host;
 		this.port = port;
-		this.observers = new ArrayList<GameObserver>();
-		connect();
 
+		this.aiPlayerAlg = aiPlayerAlg;
+
+		/*
+		 * Inicializa la lista de observadores, usualmente solo será uno, la
+		 * vista del cliente concreto.
+		 */
+		this.observers = new ArrayList<GameObserver>();
+
+		connect();
+	}
+
+	public SwingController getSwingController() {
+		return this.controller;
 	}
 
 	private void connect() throws Exception {
+
 		connectionToServer = new Connection(new Socket(host, port));
 		connectionToServer.sendObject("Connect");
 		Object response = connectionToServer.getObject();
@@ -52,8 +76,10 @@ public class GameClient extends SwingController implements
 		try {
 			gameFactory = (GameFactory) connectionToServer.getObject();
 			localPiece = (Piece) connectionToServer.getObject();
-			this.setRandomPlayer(gameFactory.createRandomPlayer());
-			this.setAiPlayer(gameFactory.createAIPlayer(aiPlayerAlg));
+			pieces = (List<Piece>) connectionToServer.getObject();
+			this.controller = new SwingController(new Game(gameFactory.gameRules()), pieces,
+					gameFactory.createRandomPlayer(),
+					gameFactory.createAIPlayer(aiPlayerAlg));
 		} catch (Exception e) {
 			throw new GameError("Unknown server response: " + e.getMessage());
 		}

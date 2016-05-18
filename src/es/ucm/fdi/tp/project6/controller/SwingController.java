@@ -30,19 +30,22 @@ public class SwingController extends Controller {
 	public SwingController(Game game, List<Piece> pieces, Player randomPlayer,
 			Player aiPlayer) {
 		super(game, pieces);
-		this.randomPlayer=randomPlayer;
+		this.randomPlayer = randomPlayer;
 		this.aiPlayer = aiPlayer;
 		this.initializePlayerModesStringArray(this.randomPlayer, this.aiPlayer);
 		this.initializePiecePlayersMap(pieces);
 	}
-	
-	public void setRandomPlayer(Player randomPlayer){
+
+	public void setRandomPlayer(Player randomPlayer) {
 		this.randomPlayer = randomPlayer;
 		this.initializePlayerModesStringArray(this.randomPlayer, this.aiPlayer);
+		this.initializePiecePlayersMap(pieces);
 	}
-	public void setAiPlayer(Player aiPlayer){
+
+	public void setAiPlayer(Player aiPlayer) {
 		this.aiPlayer = aiPlayer;
 		this.initializePlayerModesStringArray(this.randomPlayer, this.aiPlayer);
+		this.initializePiecePlayersMap(pieces);
 	}
 
 	private void initializePiecePlayersMap(List<Piece> pieces) {
@@ -54,11 +57,36 @@ public class SwingController extends Controller {
 		}
 	}
 
+	/**
+	 * Internamente la clase guarda un array de strings de tamaño el número de
+	 * modos de juego disponibles de manera que para modo de juego realmente
+	 * disponible guarda su descripción y para cada modo de juego no disponible
+	 * guarda un nulo. Por ejemplo:
+	 * 
+	 * Supongamos que los modos de juego disponibles en el main son MANUAL
+	 * RANDOM INTELLIGENT ZOMBI
+	 * 
+	 * pero que sin embargo solo están realmente disponibles el manual y el
+	 * zombi, internamente se guardaría el array MANUAL NULL NULL ZOMBI y la
+	 * variable availablePlayerModes estaría a 2.
+	 * 
+	 * Los parámetros son meramente indicadores de disponibilidad de modos de
+	 * juego.
+	 * 
+	 * @param randomPlayer
+	 * @param aiPlayer
+	 */
 	private void initializePlayerModesStringArray(Player randomPlayer,
 			Player aiPlayer) {
+
+		/*
+		 * Array con las descripciones de los disstintos modos de juego
+		 * disponibles.
+		 */
 		String[] provisionalPlayerModesStringArray = Main
 				.getPlayerModesDescriptions();
 		int length = provisionalPlayerModesStringArray.length;
+
 		this.playerModesStringArray = new String[length];
 		this.playerModesStringArray[MANUAL] = provisionalPlayerModesStringArray[MANUAL];
 		if (randomPlayer != null) {
@@ -80,7 +108,7 @@ public class SwingController extends Controller {
 	/**
 	 * Returns an array of strings with the valid player modes
 	 * 
-	 * @return
+	 * @return the internal array previously exposed.
 	 */
 	public String[] getPlayerModesStringArray() {
 		return this.playerModesStringArray;

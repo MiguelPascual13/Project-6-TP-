@@ -41,8 +41,9 @@ public class GameServer extends SwingController implements GameObserver {
 
 	public GameServer(GameFactory gameFactory, List<Piece> pieces, int port,
 			AIAlgorithm aiPlayerAlg) {
-		super(new Game(gameFactory.gameRules()), pieces, gameFactory
-				.createRandomPlayer(), gameFactory.createAIPlayer(aiPlayerAlg));
+		super(new Game(gameFactory.gameRules()), pieces,
+				gameFactory.createRandomPlayer(),
+				gameFactory.createAIPlayer(aiPlayerAlg));
 		this.port = port;
 		this.numPlayers = pieces.size();
 		this.gameFactory = gameFactory;
@@ -89,7 +90,7 @@ public class GameServer extends SwingController implements GameObserver {
 			public void StopServerButtonClicked() {
 				try {
 					stopped = true;
-					for(int i=0; i<clients.size(); i++){
+					for (int i = 0; i < clients.size(); i++) {
 						clients.get(i).stop();
 					}
 					controlWindow.out();
@@ -111,8 +112,7 @@ public class GameServer extends SwingController implements GameObserver {
 
 		while (!stopped) {
 			try {
-				Socket s = new Socket();
-				s = server.accept();
+				Socket s = server.accept();
 				controlWindow.log("Connection with Client succed \n");
 				handleRequest(s);
 			} catch (IOException e) {
@@ -143,6 +143,8 @@ public class GameServer extends SwingController implements GameObserver {
 				c.sendObject("OK");
 				c.sendObject(gameFactory);
 				c.sendObject(pieces.get(numConnections - 1));
+				//no estoy muy seguro de lo que  estoy haciendo
+				c.sendObject(pieces);
 			}
 
 			if (numPlayers == numConnections) {
@@ -194,7 +196,8 @@ public class GameServer extends SwingController implements GameObserver {
 
 	public void onGameStart(Board board, String gameDesc, List<Piece> pieces,
 			Piece turn) {
-		forwardNotification(new GameStartResponse(board, gameDesc, pieces, turn));
+		forwardNotification(
+				new GameStartResponse(board, gameDesc, pieces, turn));
 	}
 
 	public void onGameOver(Board board, State state, Piece winner) {
