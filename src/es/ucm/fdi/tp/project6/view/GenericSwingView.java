@@ -190,8 +190,7 @@ public class GenericSwingView implements GameObserver {
 		});
 	}
 
-	private QuitButtonListener getQuitButtonListener(
-			Controller controller) {
+	private QuitButtonListener getQuitButtonListener(Controller controller) {
 		return new QuitButtonListener() {
 
 			@Override
@@ -286,11 +285,14 @@ public class GenericSwingView implements GameObserver {
 			public void cellWasClicked(int row, int column, MouseEvent e) {
 				Integer answer = moveController.manageClicks(board, row, column,
 						actualTurn, viewPiece, e, getMoveStateChangeListener());
-				if (answer == MoveController.REPAINT_AND_MOVE) {
-					controller.makeMove(moveController);
-					update(board);
-				} else if (answer == MoveController.SOMETHING_TO_REPAINT) {
-					update(board);
+				if (answer != null) {
+					if (answer.equals(MoveController.REPAINT_AND_MOVE)) {
+						controller.makeMove(moveController);
+						update(board);
+					} else if (answer
+							.equals(MoveController.SOMETHING_TO_REPAINT)) {
+						update(board);
+					}
 				}
 			}
 
@@ -323,7 +325,7 @@ public class GenericSwingView implements GameObserver {
 			public void run() {
 				gui.setVisible(true);
 			}
-		}); 
+		});
 	}
 
 	private void appendChangeTurnMessage() {
@@ -341,8 +343,8 @@ public class GenericSwingView implements GameObserver {
 			if (playersMap.isPlayerOfType(this.actualTurn,
 					playersMap.getPlayerModeString(PlayersMap.RANDOM))) {
 				randomMakeMove(board);
-			} else if (playersMap.isPlayerOfType(this.actualTurn, playersMap
-					.getPlayerModeString(PlayersMap.INTELLIGENT))) {
+			} else if (playersMap.isPlayerOfType(this.actualTurn,
+					playersMap.getPlayerModeString(PlayersMap.INTELLIGENT))) {
 				intelligentMakeMove(board);
 			}
 		}
@@ -399,9 +401,9 @@ public class GenericSwingView implements GameObserver {
 				playersMap.getPlayerModeString(PlayersMap.MANUAL))) {
 			gui.appendToStatusMessagePanel(
 					moveController.notifyMoveStartInstructions());
-		} else if (viewPiece.equals(actualTurn) && playersMap.isPlayerOfType(
-				actualTurn,
-				playersMap.getPlayerModeString(PlayersMap.MANUAL))) {
+		} else if (viewPiece.equals(actualTurn)
+				&& playersMap.isPlayerOfType(actualTurn,
+						playersMap.getPlayerModeString(PlayersMap.MANUAL))) {
 			gui.appendToStatusMessagePanel(
 					moveController.notifyMoveStartInstructions());
 		}

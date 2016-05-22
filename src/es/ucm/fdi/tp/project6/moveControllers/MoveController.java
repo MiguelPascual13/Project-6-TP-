@@ -55,7 +55,7 @@ public abstract class MoveController extends Player {
 	 */
 	protected boolean checkMultiViewCase(Piece turn, Piece viewPiece) {
 		if (viewPiece != null) {
-			if (turn != viewPiece)
+			if (!turn.equals(viewPiece))
 				return false;
 			else
 				return true;

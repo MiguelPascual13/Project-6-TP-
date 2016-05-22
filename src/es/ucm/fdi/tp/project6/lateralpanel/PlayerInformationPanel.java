@@ -173,7 +173,7 @@ public class PlayerInformationPanel extends JPanel {
 		 */
 
 		public String stringMode(int row) {
-			if (viewPiece == null || viewPiece == pieces.get(row)) {
+			if (viewPiece == null || viewPiece.equals(pieces.get(row))) {
 				if (this.playersMap.isPlayerOfType(pieces.get(row), playersMap
 						.getPlayerModeString(PlayersMap.RANDOM))) {
 					return playersMap
