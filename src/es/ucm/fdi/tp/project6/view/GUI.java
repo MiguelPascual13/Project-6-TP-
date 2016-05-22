@@ -99,6 +99,7 @@ public class GUI extends JFrame {
 	 * Change the current board
 	 * 
 	 * @param board
+	 * @deprecated
 	 */
 	public void setBoard(Board board) {
 		this.boardPanel.setBoard(board);
@@ -113,11 +114,18 @@ public class GUI extends JFrame {
 	 * @param turn
 	 */
 	public void update(Integer selectedRow, Integer selectedColumn,
-			List<Pair<Integer, Integer>> filter, Piece turn, Board board) {
-		this.setBoard(board);
-		this.boardPanel.update(selectedRow, selectedColumn, filter, turn);
-		this.lateralPanel.updateTable();
-		SwingUtilities.updateComponentTreeUI(this);
+			List<Pair<Integer, Integer>> filter, Piece turn, Board board,
+			List<Piece> pieces, Piece viewPiece, PlayersMap playersMap,
+			PieceColorMap colorChooser) {
+		
+		//actualización del panel de tablero
+		this.boardPanel.update(selectedRow, selectedColumn, filter, turn,
+				board);
+		
+		//actualización de la tabla (MODIFICAR)
+		this.lateralPanel.updateTable(pieces, board, viewPiece, playersMap,
+				colorChooser);
+		
 		this.repaint();
 	}
 
@@ -145,15 +153,16 @@ public class GUI extends JFrame {
 	public void disableAutomaticMoves(boolean disable) {
 		this.lateralPanel.disableAutomaticMoves(disable);
 	}
-	
+
 	/**
 	 * EXPERIMENTAL
+	 * 
 	 * @deprecated
 	 */
 	public void disableFilters() {
 		this.boardPanel.disableFilters();
 	}
-	
+
 	public void disableQuitButton(boolean disable) {
 		lateralPanel.disableQuitButton(disable);
 	}

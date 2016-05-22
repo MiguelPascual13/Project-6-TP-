@@ -3,6 +3,7 @@ package es.ucm.fdi.tp.project6.view;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -11,6 +12,7 @@ import javax.swing.JOptionPane;
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
 import es.ucm.fdi.tp.basecode.bgame.model.Board;
+import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.Game.State;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
@@ -34,13 +36,13 @@ import es.ucm.fdi.tp.project6.utils.PieceColorMap;
  */
 public class GenericSwingView implements GameObserver {
 
-	private static final String startingMessage = "Starting ";
-	private static final String changeTurnMessage = "Turn for ";
-	private static final String gameOverMessage = "Game Over!!\n";
-	private static final String gameStatusMessage = "Game Status: ";
-	private static final String winnerMessage = "Winner: ";
-	private static final String titleMessage = "Board Games: ";
-	private static final String youMessage = " You ";
+	private static final String STARTING_MESSAGE = "Starting ";
+	private static final String CHANGE_TURN_MESSAGE = "Turn for ";
+	private static final String GAME_OVER_MESSAGE = "Game Over!!\n";
+	private static final String GAME_STATUS_MESSAGE = "Game Status: ";
+	private static final String WINNER_MESSAGE = "Winner: ";
+	private static final String TITLE_MESSAGE = "Board Games: ";
+	private static final String YOU_MESSAGE = " You ";
 
 	private PieceColorMap colorChooser;
 	private Controller controller;
@@ -51,39 +53,33 @@ public class GenericSwingView implements GameObserver {
 	private MoveController moveController;
 	private Player random;
 	private Player ai;
-
 	private Board board;
+	private List<Piece> pieces;
 
-	/**
-	 * Constructor to match the arguments of the method createSwing view in the
-	 * factories of the basecode.
-	 * 
-	 * @param g
-	 *            game in play
-	 * @param c
-	 *            controller to use
-	 * @param viewPiece
-	 *            owner of the view
-	 * @param moveController
-	 *            kind of move generator (depends on the concrete game).
-	 * @param random
-	 *            ramdom move generator
-	 * @param ai
-	 *            intelligent move generator
-	 */
 	public GenericSwingView(Observable<GameObserver> g, Controller c,
 			final Piece viewPiece, MoveController moveController, Player random,
 			Player ai) {
 
+		// Automatic players references.
 		this.random = random;
 		this.ai = ai;
+
+		// PlayersMap configuration.
 		this.playersMap = Main.getPlayersMap();
 		this.playersMap.setRandomPlayer(random);
 		this.playersMap.setAiPlayer(ai);
+
 		this.moveController = moveController;
 		this.controller = c;
+
 		this.viewPiece = viewPiece;
+
+		/*
+		 * Suscription to the model events, in the client-server application
+		 * mode, the application subscribes to the client events.
+		 */
 		g.addObserver(this);
+
 		colorChooser = new PieceColorMap();
 	}
 
@@ -92,6 +88,7 @@ public class GenericSwingView implements GameObserver {
 			Piece turn) {
 
 		this.board = board;
+		this.pieces = pieces;
 
 		/* to avoid strange behaviors in case of restarting */
 		if (gui != null)
@@ -109,17 +106,20 @@ public class GenericSwingView implements GameObserver {
 
 		setGUITitle(gameDesc);
 		checkForDisablingButtons();
+		
 		update();
+		
 		gui.appendToStatusMessagePanel(
-				startingMessage + "'" + gameDesc + "'\n");
+				STARTING_MESSAGE + "'" + gameDesc + "'\n");
 		if (viewPiece != null && this.viewPiece.equals(this.actualTurn)) {
 			gui.appendToStatusMessagePanel(
-					changeTurnMessage + youMessage + this.actualTurn + "\n");
+					CHANGE_TURN_MESSAGE + YOU_MESSAGE + this.actualTurn + "\n");
 		} else {
 			gui.appendToStatusMessagePanel(
-					changeTurnMessage + this.actualTurn + "\n");
+					CHANGE_TURN_MESSAGE + this.actualTurn + "\n");
 		}
 		checkForMoreMoveIndications();
+		
 		setGUIvisible();
 	}
 
@@ -128,15 +128,15 @@ public class GenericSwingView implements GameObserver {
 		this.board = board;
 		update();
 
-		gui.appendToStatusMessagePanel(gameOverMessage);
-		gui.appendToStatusMessagePanel(gameStatusMessage + state + "\n");
+		gui.appendToStatusMessagePanel(GAME_OVER_MESSAGE);
+		gui.appendToStatusMessagePanel(GAME_STATUS_MESSAGE + state + "\n");
 		if (winner != null) {
-			gui.appendToStatusMessagePanel(winnerMessage + winner + "\n");
-			JOptionPane.showMessageDialog(new JFrame(), winnerMessage + winner,
-					gameOverMessage, JOptionPane.PLAIN_MESSAGE);
+			gui.appendToStatusMessagePanel(WINNER_MESSAGE + winner + "\n");
+			JOptionPane.showMessageDialog(new JFrame(), WINNER_MESSAGE + winner,
+					GAME_OVER_MESSAGE, JOptionPane.PLAIN_MESSAGE);
 		} else {
 			JOptionPane.showMessageDialog(new JFrame(),
-					gameStatusMessage + state, gameOverMessage,
+					GAME_STATUS_MESSAGE + state, GAME_OVER_MESSAGE,
 					JOptionPane.PLAIN_MESSAGE);
 		}
 
@@ -150,14 +150,10 @@ public class GenericSwingView implements GameObserver {
 
 	@Override
 	public void onMoveStart(Board board, Piece turn) {
-		this.board = board;
-		update();
 	}
 
 	@Override
 	public void onMoveEnd(Board board, Piece turn, boolean success) {
-		this.board = board;
-		update();
 	}
 
 	@Override
@@ -167,8 +163,8 @@ public class GenericSwingView implements GameObserver {
 		checkForDisablingButtons();
 		appendChangeTurnMessage();
 		checkForMoreMoveIndications();
-		update();
 		checkForAutomaticMoves();
+		update();
 	}
 
 	@Override
@@ -323,27 +319,32 @@ public class GenericSwingView implements GameObserver {
 
 	private void setGUITitle(String gameDesc) {
 		if (viewPiece == null) {
-			gui.setTitle(titleMessage + gameDesc);
+			gui.setTitle(TITLE_MESSAGE + gameDesc);
 		} else {
-			gui.setTitle(titleMessage + gameDesc + " (" + viewPiece + ")");
+			gui.setTitle(TITLE_MESSAGE + gameDesc + " (" + viewPiece + ")");
 		}
 	}
 
 	private void setGUIvisible() {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				gui.setVisible(true);
-			}
-		});
+		try {
+			EventQueue.invokeAndWait(new Runnable() {
+				public void run() {
+					gui.setVisible(true);
+				}
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			e.printStackTrace();
+			throw new GameError("Error while creating the SwingView");
+		}
 	}
 
 	private void appendChangeTurnMessage() {
 		if (this.viewPiece != null && this.viewPiece.equals(this.actualTurn)) {
 			gui.appendToStatusMessagePanel(
-					changeTurnMessage + youMessage + this.actualTurn + "\n");
+					CHANGE_TURN_MESSAGE + YOU_MESSAGE + this.actualTurn + "\n");
 		} else {
 			gui.appendToStatusMessagePanel(
-					changeTurnMessage + this.actualTurn + "\n");
+					CHANGE_TURN_MESSAGE + this.actualTurn + "\n");
 		}
 	}
 
@@ -398,7 +399,7 @@ public class GenericSwingView implements GameObserver {
 		gui.update(moveController.getSelectedRow(),
 				moveController.getSelectedColumn(),
 				moveController.getFilterOnCells(this.board), this.actualTurn,
-				this.board);
+				this.board, pieces, actualTurn, playersMap, colorChooser);
 	}
 
 	/**

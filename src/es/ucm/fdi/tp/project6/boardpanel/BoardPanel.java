@@ -29,7 +29,7 @@ public class BoardPanel extends JPanel {
 		this.listener = listener;
 		this.colorChooser = colorChooser;
 		this.setBoard(board);
-		this.update(null, null, null, null);
+		this.update(null, null, null, null, board);
 	}
 
 	public void setBoard(Board board) {
@@ -42,7 +42,8 @@ public class BoardPanel extends JPanel {
 	}
 
 	public void update(Integer row, Integer column,
-			List<Pair<Integer, Integer>> filterOnCellsList, Piece turn) {
+			List<Pair<Integer, Integer>> filterOnCellsList, Piece turn,
+			Board board) {
 		for (int i = 0; i < this.board.getRows(); i++) {
 			for (int j = 0; j < this.board.getCols(); j++) {
 				cells[i][j].setOpaque(true);
@@ -79,18 +80,20 @@ public class BoardPanel extends JPanel {
 			}
 		}
 	}
-	
+
 	/**
 	 * EXPERIMENTAL: Substitution of the squares, chante it to circles.
+	 * 
 	 * @deprecated
 	 * @param g
 	 * @param color
 	 */
 	public void paintComponent(Graphics g, Color color) {
 	}
-	
+
 	/**
 	 * EXPERIMENTAL:
+	 * 
 	 * @deprecated
 	 */
 	public void disableFilters() {

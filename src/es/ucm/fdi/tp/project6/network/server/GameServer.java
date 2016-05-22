@@ -6,6 +6,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.swing.SwingUtilities;
 
@@ -63,7 +65,9 @@ public class GameServer extends Controller implements GameObserver {
 	private ControlGUI controlGUI;
 
 	private boolean isTheFirstTime;
-
+	
+	Executor exec = Executors.newCachedThreadPool();
+	
 	/*---SHARED VALUES (RequestHandler and ServerControl, declared as volatile)---*/
 	private volatile ServerSocket server;
 	private volatile boolean stopped;
@@ -73,7 +77,7 @@ public class GameServer extends Controller implements GameObserver {
 	 * Set the server configuration values and determines the reference to the
 	 * gameFactory and the list of pieces. Initializes everything necessary to
 	 * avoid nullPointers and registers as an observer of the model. This
-	 * constructor does not initializes the Server.
+	 * constructor DOES NOT initializes the Server.
 	 * 
 	 * @param gameFactory
 	 * @param pieces
@@ -92,8 +96,11 @@ public class GameServer extends Controller implements GameObserver {
 		this.clients = new ArrayList<Connection>();
 		this.isTheFirstTime = true;
 
+		/* Nos registramos para los eventos del modelo */
 		this.game.addObserver(this);
 	}
+
+	/*---SOBREESCRITURA DE LOS MÉTODOS DE CONTROLLER---*/
 
 	@Override
 	public synchronized void makeMove(Player player) {
@@ -124,11 +131,12 @@ public class GameServer extends Controller implements GameObserver {
 
 	@Override
 	public void start() {
+		// controlGUI se inicia por defecto en otra hebra.
 		startControlGUI();
 		startServer();
 	}
 
-	public void append(String message) {
+	private void append(String message) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				controlGUI.append(message);
@@ -137,17 +145,22 @@ public class GameServer extends Controller implements GameObserver {
 	}
 
 	private void startServer() {
+
+		// Inicialización del servidor.
 		try {
 			server = new ServerSocket(this.portNumber);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
+		/*
+		 * Siempre y cuando el servidor no se pare haremos que se quede
+		 * esperando nuevas conexiones en una hebra (que aceptará o rechazará)
+		 */
 		this.stopped = false;
 		while (!stopped) {
 			try {
 				Socket socket = server.accept();
-				this.append("Client connected succesfully");
 				this.handleRequest(socket);
 			} catch (IOException e) {
 				if (!stopped)
@@ -155,6 +168,8 @@ public class GameServer extends Controller implements GameObserver {
 				e.printStackTrace();
 			}
 		}
+
+		// Echar a los clientes tras cerrar el servidor.
 	}
 
 	private void handleRequest(Socket socket) {
@@ -176,10 +191,14 @@ public class GameServer extends Controller implements GameObserver {
 			this.serverIsFull(connection);
 			this.currentClients++;
 			this.clients.add(connection);
+			this.append("Client connected succesfully");
 			connection.sendObject("OK");
+
+			/* Enviamos al cliente lo necesario. */
 			connection.sendObject(this.gameFactory);
 			connection.sendObject(this.pieces.get(currentClients - 1));
 
+			/* Cuando estén los justos se inicia el juego */
 			if (this.currentClients == this.requiredClients) {
 				if (isTheFirstTime) {
 					game.start(pieces);
@@ -190,15 +209,29 @@ public class GameServer extends Controller implements GameObserver {
 					restart();
 				}
 			}
+
+			/* Nos registramos a los eventos del cliente */
 			startClientListener(connection);
+
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
+	private void serverIsFull(Connection connection) {
+		if (this.currentClients == this.requiredClients) {
+			try {
+				connection.sendObject(new GameError("Server Full of People"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	private void startClientListener(Connection connection) {
 		this.gameOver = false;
-		Thread thread = new Thread(new Runnable() {
+		exec.execute(new Runnable() {
+
 			@Override
 			public void run() {
 				while (!stopped && !gameOver) {
@@ -214,9 +247,11 @@ public class GameServer extends Controller implements GameObserver {
 					}
 				}
 			}
+			
 		});
-		thread.start();
 	}
+
+	/*---GUI del servidor---*/
 
 	/**
 	 * Initializes the GUI to control the server.
@@ -232,6 +267,36 @@ public class GameServer extends Controller implements GameObserver {
 			e.printStackTrace();
 		}
 	}
+
+	private StopButtonListener getStopButtonListener() {
+		return new StopButtonListener() {
+			@Override
+			public void stopButtonClicked() {
+				controlGUI.append("Server Stopped");
+				controlGUI.dispose();
+			}
+		};
+	}
+
+	/**
+	 * Sends a notification to every client connected. Used to re send the
+	 * observers notifications.
+	 * 
+	 * @param response
+	 */
+	private void forwardNotification(Response response) {
+		for (int i = 0; i < this.clients.size(); i++) {
+			try {
+				clients.get(i).sendObject(response);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/*---IMPLEMENTACIÓN DE GAME OBSERVER---
+	 * Cada vez que nos llega un evento del modelo, lanzamos a todos los clientes
+	 * un objeto de respuesta que ellos se encargará de ejecutar.*/
 
 	@Override
 	public void onGameStart(Board board, String gameDesc, List<Piece> pieces,
@@ -263,41 +328,5 @@ public class GameServer extends Controller implements GameObserver {
 	@Override
 	public void onError(String msg) {
 		this.forwardNotification(new ErrorResponse(msg));
-	}
-
-	private StopButtonListener getStopButtonListener() {
-		return new StopButtonListener() {
-			@Override
-			public void stopButtonClicked() {
-				controlGUI.append("Server Stopped");
-				controlGUI.dispose();
-			}
-		};
-	}
-
-	/**
-	 * Sends a notification to every client connected. Used to re send the
-	 * observers notifications.
-	 * 
-	 * @param response
-	 */
-	private void forwardNotification(Response response) {
-		for (int i = 0; i < this.clients.size(); i++) {
-			try {
-				clients.get(i).sendObject(response);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private void serverIsFull(Connection connection) {
-		if (this.currentClients == this.requiredClients) {
-			try {
-				connection.sendObject(new GameError("Server Full of People"));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 }

@@ -26,7 +26,6 @@ public class AdvancedTTTFactoryExt extends AdvancedTTTFactory {
 		moveController = new AdvancedTTTMoveController();
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
-
 				@Override
 				public void run() {
 					new GenericSwingView(g, c, viewPiece, moveController,
