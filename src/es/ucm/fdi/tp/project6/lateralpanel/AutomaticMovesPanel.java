@@ -10,7 +10,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import es.ucm.fdi.tp.project6.controller.SwingController;
+import es.ucm.fdi.tp.project6.controller.PlayersMap;
 
 @SuppressWarnings("serial")
 public class AutomaticMovesPanel extends JPanel {
@@ -71,14 +71,14 @@ public class AutomaticMovesPanel extends JPanel {
 
 	private void addListeners(RandomButtonListener randomListener,
 			IntelligentButtonListener intelligentListener) {
-		if (this.buttonAvailable(SwingController.RANDOM))
+		if (this.buttonAvailable(PlayersMap.RANDOM))
 			addRandomButtonListener(randomListener);
-		if (this.buttonAvailable(SwingController.INTELLIGENT))
+		if (this.buttonAvailable(PlayersMap.INTELLIGENT))
 			addIntelligentButtonListener(intelligentListener);
 	}
 
 	private void addRandomButtonListener(RandomButtonListener listener) {
-		this.playerModeButtons.get(SwingController.RANDOM)
+		this.playerModeButtons.get(PlayersMap.RANDOM)
 				.addActionListener(new ActionListener() {
 
 					@Override
@@ -91,7 +91,7 @@ public class AutomaticMovesPanel extends JPanel {
 
 	private void addIntelligentButtonListener(
 			IntelligentButtonListener listener) {
-		this.playerModeButtons.get(SwingController.INTELLIGENT)
+		this.playerModeButtons.get(PlayersMap.INTELLIGENT)
 				.addActionListener(new ActionListener() {
 
 					@Override

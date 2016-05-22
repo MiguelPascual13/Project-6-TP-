@@ -11,12 +11,11 @@ import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 import es.ucm.fdi.tp.basecode.ttt.TicTacToeFactory;
-import es.ucm.fdi.tp.project6.controller.SwingController;
 import es.ucm.fdi.tp.project6.moveControllers.TicTacToeMoveController;
 import es.ucm.fdi.tp.project6.view.GenericSwingView;
 
 @SuppressWarnings("serial")
-public class TicTacToeFactoryExt extends TicTacToeFactory {
+public class TicTacToeFactoryExt extends TicTacToeFactory{
 
 	private TicTacToeMoveController moveController;
 
@@ -25,19 +24,18 @@ public class TicTacToeFactoryExt extends TicTacToeFactory {
 			final Controller c, final Piece viewPiece, Player random,
 			Player ai) {
 		moveController = new TicTacToeMoveController();
-		try{
-			SwingUtilities.invokeAndWait(new Runnable(){
+		try {
+			SwingUtilities.invokeAndWait(new Runnable() {
 
 				@Override
 				public void run() {
-					new GenericSwingView(g, (SwingController) (c), viewPiece,
-							moveController, random, ai);
+					new GenericSwingView(g, c, viewPiece, moveController,
+							random, ai);
 				}
 			});
-		
-		}
-		catch(InterruptedException | InvocationTargetException e){
+
+		} catch (InterruptedException | InvocationTargetException e) {
 			throw new GameError("Error while creating the SwingView");
 		}
-		}
+	}
 }

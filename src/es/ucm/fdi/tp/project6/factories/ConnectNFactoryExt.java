@@ -11,7 +11,6 @@ import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 import es.ucm.fdi.tp.basecode.connectn.ConnectNFactory;
-import es.ucm.fdi.tp.project6.controller.SwingController;
 import es.ucm.fdi.tp.project6.moveControllers.ConnectNMoveController;
 import es.ucm.fdi.tp.project6.view.GenericSwingView;
 
@@ -20,7 +19,7 @@ import es.ucm.fdi.tp.project6.view.GenericSwingView;
  * of the game.
  */
 @SuppressWarnings("serial")
-public class ConnectNFactoryExt extends ConnectNFactory {
+public class ConnectNFactoryExt extends ConnectNFactory{
 
 	private ConnectNMoveController moveController;
 
@@ -37,20 +36,18 @@ public class ConnectNFactoryExt extends ConnectNFactory {
 			final Controller c, final Piece viewPiece, Player random,
 			Player ai) {
 		moveController = new ConnectNMoveController();
-		try{
-			SwingUtilities.invokeAndWait(new Runnable(){
+		try {
+			SwingUtilities.invokeAndWait(new Runnable() {
 
 				@Override
 				public void run() {
-					new GenericSwingView(g, (SwingController) (c), viewPiece,
-							moveController, random, ai);
+					new GenericSwingView(g, c, viewPiece, moveController,
+							random, ai);
 				}
 			});
-		
-		}
-		catch(InterruptedException | InvocationTargetException e){
+
+		} catch (InterruptedException | InvocationTargetException e) {
 			throw new GameError("Error while creating the SwingView");
 		}
-		}
-
+	}
 }

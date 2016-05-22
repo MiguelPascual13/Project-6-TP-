@@ -15,7 +15,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import es.ucm.fdi.tp.basecode.bgame.model.Board;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
-import es.ucm.fdi.tp.project6.controller.SwingController;
+import es.ucm.fdi.tp.project6.controller.PlayersMap;
 import es.ucm.fdi.tp.project6.utils.PieceColorMap;
 /**
  * PlayerInformationPanel Class
@@ -51,7 +51,7 @@ public class PlayerInformationPanel extends JPanel {
 
 	public PlayerInformationPanel(List<Piece> pieces, Board board,
 			PieceColorMap colorChooser, Piece viewPiece,
-			SwingController controller) {
+			PlayersMap playersMap) {
 
 		super(new BorderLayout());
 		this.setBorder(BorderFactory.createTitledBorder(
@@ -59,7 +59,7 @@ public class PlayerInformationPanel extends JPanel {
 
 		String columName[] = { COL1, COL2, COL3 };
 		table = new JTable(new MyTableModel(pieces, columName, board, viewPiece,
-				controller));
+				playersMap));
 		for (int i = 0; i < 3; i++) {
 			table.getColumnModel().getColumn(i).setHeaderValue(columName[i]);
 		}
@@ -104,7 +104,7 @@ public class PlayerInformationPanel extends JPanel {
 		private List<Piece> pieces;
 		private Board board;
 		private Piece viewPiece;
-		private SwingController controller;
+		private PlayersMap playersMap;
 		
 		/**
 		 * Constructor of the Table Model static class.
@@ -116,12 +116,12 @@ public class PlayerInformationPanel extends JPanel {
 		 */
 
 		public MyTableModel(List<Piece> pieces, String[] columnName,
-				Board board, Piece viewPiece, SwingController controller) {
+				Board board, Piece viewPiece, PlayersMap playersMap) {
 			this.pieces = pieces;
 			this.columnName = columnName;
 			this.board = board;
 			this.viewPiece = viewPiece;
-			this.controller = controller;
+			this.playersMap = playersMap;
 		}
 
 		@Override
@@ -174,18 +174,18 @@ public class PlayerInformationPanel extends JPanel {
 
 		public String stringMode(int row) {
 			if (viewPiece == null || viewPiece == pieces.get(row)) {
-				if (this.controller.isPlayerOfType(pieces.get(row), controller
-						.getPlayerModeString(SwingController.RANDOM))) {
-					return controller
-							.getPlayerModeString(SwingController.RANDOM);
-				} else if (this.controller.isPlayerOfType(pieces.get(row),
-						controller.getPlayerModeString(
-								SwingController.INTELLIGENT))) {
-					return controller
-							.getPlayerModeString(SwingController.INTELLIGENT);
+				if (this.playersMap.isPlayerOfType(pieces.get(row), playersMap
+						.getPlayerModeString(PlayersMap.RANDOM))) {
+					return playersMap
+							.getPlayerModeString(PlayersMap.RANDOM);
+				} else if (this.playersMap.isPlayerOfType(pieces.get(row),
+						playersMap.getPlayerModeString(
+								PlayersMap.INTELLIGENT))) {
+					return playersMap
+							.getPlayerModeString(PlayersMap.INTELLIGENT);
 				} else {
-					return controller
-							.getPlayerModeString(SwingController.MANUAL);
+					return playersMap
+							.getPlayerModeString(PlayersMap.MANUAL);
 				}
 			} else {
 				return UNKNOWN;

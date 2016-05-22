@@ -1,30 +1,27 @@
-package es.ucm.fdi.tp.project6.network;
+package es.ucm.fdi.tp.project6.network.client;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.GameFactory;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
 import es.ucm.fdi.tp.basecode.bgame.control.commands.Command;
 import es.ucm.fdi.tp.basecode.bgame.control.commands.PlayCommand;
 import es.ucm.fdi.tp.basecode.bgame.control.commands.QuitCommand;
 import es.ucm.fdi.tp.basecode.bgame.control.commands.RestartCommand;
-import es.ucm.fdi.tp.basecode.bgame.model.AIAlgorithm;
 import es.ucm.fdi.tp.basecode.bgame.model.Board;
-import es.ucm.fdi.tp.basecode.bgame.model.Game;
 import es.ucm.fdi.tp.basecode.bgame.model.Game.State;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.GameObserver;
 import es.ucm.fdi.tp.basecode.bgame.model.Observable;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
-import es.ucm.fdi.tp.project6.controller.SwingController;
+import es.ucm.fdi.tp.project6.network.Connection;
+import es.ucm.fdi.tp.project6.network.responseclasses.Response;
 
-public class GameClient implements Observable<GameObserver> {
-
-	private SwingController controller;
-	private List<Piece> pieces;
+public class GameClient extends Controller implements Observable<GameObserver> {
 
 	private String host;
 	private int port;
@@ -37,20 +34,15 @@ public class GameClient implements Observable<GameObserver> {
 	private Connection connectionToServer;
 
 	private boolean gameOver;
-	private AIAlgorithm aiPlayerAlg;
 
-	public GameClient(String host, int port, AIAlgorithm aiPlayerAlg)
-			throws Exception {
-		/*
-		 * En mi opinión podríamos arreglarlo casi todo si hicieramos que en vez
-		 * de ser un controlador, GameClient tubiera un controlador, de tal
-		 * manera que lo contruyeramos sólo tienendo ya todo lo necesario
-		 */
+	public GameClient(String host, int port) throws Exception {
 
+		/* Realmente gameClient será un controlador fantasma */
+		super(null, null);
+
+		/* Configuración del servidor al que se va a conectar */
 		this.host = host;
 		this.port = port;
-
-		this.aiPlayerAlg = aiPlayerAlg;
 
 		/*
 		 * Inicializa la lista de observadores, usualmente solo será uno, la
@@ -58,28 +50,31 @@ public class GameClient implements Observable<GameObserver> {
 		 */
 		this.observers = new ArrayList<GameObserver>();
 
+		/* Trata de conectarse al servidor */
 		connect();
 	}
 
-	public SwingController getSwingController() {
-		return this.controller;
-	}
-
 	private void connect() throws Exception {
-
+		// creamos el "canuto" para comunicarnos con el servidor
 		connectionToServer = new Connection(new Socket(host, port));
+
+		/* Mandamos la señal de conexion */
 		connectionToServer.sendObject("Connect");
+
+		/* El servidor nos responde, vamos a ver cómo */
 		Object response = connectionToServer.getObject();
+
+		/* Si nos responde con una excepción la relanzaremos */
 		if (response instanceof Exception) {
 			throw (Exception) response;
 		}
 		try {
+			/*
+			 * En caso de no haber sido una excepción se trata de el string de
+			 * confirmación seguido de los objetos de factoría y pieza local.
+			 */
 			gameFactory = (GameFactory) connectionToServer.getObject();
 			localPiece = (Piece) connectionToServer.getObject();
-			pieces = (List<Piece>) connectionToServer.getObject();
-			this.controller = new SwingController(new Game(gameFactory.gameRules()), pieces,
-					gameFactory.createRandomPlayer(),
-					gameFactory.createAIPlayer(aiPlayerAlg));
 		} catch (Exception e) {
 			throw new GameError("Unknown server response: " + e.getMessage());
 		}
@@ -101,22 +96,32 @@ public class GameClient implements Observable<GameObserver> {
 		this.observers.remove(o);
 	}
 
-	public void makeMove(Player p) {
-		forwardCommand(new PlayCommand(p));
+	/*---SOBREESCRITURA DE MÉTODOS DE CONTROLLER---*/
+	@Override
+	public void makeMove(Player player) {
+		forwardCommand(new PlayCommand(player));
 	}
 
+	@Override
 	public void stop() {
 		forwardCommand(new QuitCommand());
 	}
 
+	@Override
 	public void restart() {
 		forwardCommand(new RestartCommand());
 	}
 
-	private void forwardCommand(Command cmd) {
-		if (gameOver == false) {
+	/**
+	 * Si el servidor está parado no hace nada, en caso contrario manda un
+	 * comando al servidor.
+	 * 
+	 * @param cmd
+	 */
+	private void forwardCommand(Command command) {
+		if (!gameOver) {
 			try {
-				connectionToServer.sendObject(cmd);
+				connectionToServer.sendObject(command);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

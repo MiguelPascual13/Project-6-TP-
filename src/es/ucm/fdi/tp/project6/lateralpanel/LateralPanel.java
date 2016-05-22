@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 
 import es.ucm.fdi.tp.basecode.bgame.model.Board;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
-import es.ucm.fdi.tp.project6.controller.SwingController;
+import es.ucm.fdi.tp.project6.controller.PlayersMap;
 import es.ucm.fdi.tp.project6.lateralpanel.AutomaticMovesPanel.IntelligentButtonListener;
 import es.ucm.fdi.tp.project6.lateralpanel.AutomaticMovesPanel.RandomButtonListener;
 import es.ucm.fdi.tp.project6.lateralpanel.PieceColorsPanel.ColorChangeListener;
@@ -31,8 +31,8 @@ public class LateralPanel extends JPanel {
 	private Piece piecesArray[];
 
 	public LateralPanel(List<Piece> pieces, PieceColorMap colorChooser,
-			Board board, Piece viewPiece, SwingController controller,
-			Piece turn, QuitButtonListener quitButtonListener,
+			Board board, Piece viewPiece, PlayersMap playersMap, Piece turn,
+			QuitButtonListener quitButtonListener,
 			RestartButtonListener restartButtonListener,
 			RandomButtonListener randomButtonListener,
 			IntelligentButtonListener intelligentButtonListener,
@@ -44,7 +44,7 @@ public class LateralPanel extends JPanel {
 
 		statusMessagePanel = new StatusMessagePanel();
 		playerInformationPanel = new PlayerInformationPanel(pieces, board,
-				colorChooser, viewPiece, controller);
+				colorChooser, viewPiece, playersMap);
 		this.buildPieceColorPanel(pieces, colorChangeListener);
 		this.buildQuitRestartPanel(viewPiece, quitButtonListener,
 				restartButtonListener);
@@ -52,9 +52,9 @@ public class LateralPanel extends JPanel {
 		this.add(statusMessagePanel);
 		this.add(playerInformationPanel);
 		this.add(pieceColorsPanel);
-		this.buildAndAddPlayerModesPanel(piecesArray, viewPiece, controller,
+		this.buildAndAddPlayerModesPanel(piecesArray, viewPiece, playersMap,
 				playerModesChangeListener);
-		this.buildAndAddAutomaticMovesPanel(controller, randomButtonListener,
+		this.buildAndAddAutomaticMovesPanel(playersMap, randomButtonListener,
 				intelligentButtonListener);
 		this.add(quitRestartPanel);
 
@@ -75,14 +75,14 @@ public class LateralPanel extends JPanel {
 	}
 
 	private boolean buildPlayerModesPanel(Piece pieces[], Piece viewPiece,
-			SwingController controller,
+			PlayersMap playersMap,
 			PlayerModesChangeListener playerModesChangeListener) {
-		if (controller.getAvailablePlayerModes() == 1) {
+		if (playersMap.getAvailablePlayerModes() == 1) {
 			return false;
 		} else {
 			playerModesPanel = new PlayerModesPanel(pieces,
 					playerModesChangeListener, viewPiece,
-					controller.getPlayerModesStringArray());
+					playersMap.getPlayerModesStringArray());
 			return true;
 		}
 	}
@@ -96,9 +96,9 @@ public class LateralPanel extends JPanel {
 	}
 
 	private void buildAndAddPlayerModesPanel(Piece pieces[], Piece viewPiece,
-			SwingController controller,
+			PlayersMap playersMap,
 			PlayerModesChangeListener playerModesChangeListener) {
-		if (this.buildPlayerModesPanel(pieces, viewPiece, controller,
+		if (this.buildPlayerModesPanel(pieces, viewPiece, playersMap,
 				playerModesChangeListener))
 			this.add(playerModesPanel);
 	}
@@ -109,23 +109,23 @@ public class LateralPanel extends JPanel {
 		pieceColorsPanel = new PieceColorsPanel(piecesArray, listener);
 	}
 
-	private boolean buildAutomaticMovesPanel(SwingController controller,
+	private boolean buildAutomaticMovesPanel(PlayersMap playersMap,
 			RandomButtonListener randomButtonListener,
 			IntelligentButtonListener intelligentButtonListener) {
-		if (controller.getAvailablePlayerModes() == 1) {
+		if (playersMap.getAvailablePlayerModes() == 1) {
 			return false;
 		} else {
 			automaticMovesPanel = new AutomaticMovesPanel(randomButtonListener,
 					intelligentButtonListener,
-					controller.getPlayerModesStringArray());
+					playersMap.getPlayerModesStringArray());
 			return true;
 		}
 	}
 
-	private void buildAndAddAutomaticMovesPanel(SwingController controller,
+	private void buildAndAddAutomaticMovesPanel(PlayersMap playersMap,
 			RandomButtonListener randomButtonListener,
 			IntelligentButtonListener intelligentButtonListener) {
-		if (this.buildAutomaticMovesPanel(controller, randomButtonListener,
+		if (this.buildAutomaticMovesPanel(playersMap, randomButtonListener,
 				intelligentButtonListener))
 			this.add(automaticMovesPanel);
 	}

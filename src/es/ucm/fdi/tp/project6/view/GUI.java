@@ -6,13 +6,12 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 
-import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.model.Board;
 import es.ucm.fdi.tp.basecode.bgame.model.Pair;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 import es.ucm.fdi.tp.project6.boardpanel.BoardPanel;
 import es.ucm.fdi.tp.project6.boardpanel.Cell.CellClickedListener;
-import es.ucm.fdi.tp.project6.controller.SwingController;
+import es.ucm.fdi.tp.project6.controller.PlayersMap;
 import es.ucm.fdi.tp.project6.lateralpanel.AutomaticMovesPanel.IntelligentButtonListener;
 import es.ucm.fdi.tp.project6.lateralpanel.AutomaticMovesPanel.RandomButtonListener;
 import es.ucm.fdi.tp.project6.lateralpanel.LateralPanel;
@@ -55,7 +54,7 @@ public class GUI extends JFrame {
 	 */
 	public GUI(Board board, List<Piece> pieces, PieceColorMap colorChooser,
 			Piece turn, MoveController moveController, Piece viewPiece,
-			SwingController controller, QuitButtonListener quitButtonListener,
+			PlayersMap playersMap, QuitButtonListener quitButtonListener,
 			RestartButtonListener restartButtonListener,
 			RandomButtonListener randomButtonListener,
 			IntelligentButtonListener intelligentButtonListener,
@@ -66,11 +65,11 @@ public class GUI extends JFrame {
 		super();
 		this.vSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
-		buildBoard(board, colorChooser, moveController, controller, viewPiece,
+		buildBoard(board, colorChooser, moveController, playersMap, viewPiece,
 				cellClickedListener);
 
 		lateralPanel = new LateralPanel(pieces, colorChooser, board, viewPiece,
-				controller, turn, quitButtonListener, restartButtonListener,
+				playersMap, turn, quitButtonListener, restartButtonListener,
 				randomButtonListener, intelligentButtonListener,
 				colorChangeListener, playerModesChangeListener);
 
@@ -131,7 +130,7 @@ public class GUI extends JFrame {
 	 * @param cellClickedListener
 	 */
 	private void buildBoard(Board board, PieceColorMap colorChooser,
-			MoveController moveController, Controller controller,
+			MoveController moveController, PlayersMap playersMap,
 			Piece viewPiece, CellClickedListener cellClickedListener) {
 		boardPanel = new BoardPanel(board, colorChooser, cellClickedListener);
 	}

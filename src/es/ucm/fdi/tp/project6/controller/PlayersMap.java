@@ -4,17 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import es.ucm.fdi.tp.basecode.bgame.control.Controller;
 import es.ucm.fdi.tp.basecode.bgame.control.Player;
-import es.ucm.fdi.tp.basecode.bgame.model.Game;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 import es.ucm.fdi.tp.project6.Main;
 
-/**
- * Controller extended utilities for a swing view.
- */
-public class SwingController extends Controller {
-
+public class PlayersMap {
 	private int availablePlayerModes = 1;
 	private Player randomPlayer;
 	private Player aiPlayer;
@@ -26,12 +20,10 @@ public class SwingController extends Controller {
 
 	protected Map<Piece, String> players;
 	protected String playerModesStringArray[];
-
-	public SwingController(Game game, List<Piece> pieces, Player randomPlayer,
-			Player aiPlayer) {
-		super(game, pieces);
-		this.randomPlayer = randomPlayer;
-		this.aiPlayer = aiPlayer;
+	private List<Piece> pieces;
+	
+	public PlayersMap(List<Piece> pieces) {
+		this.pieces = pieces;
 		this.initializePlayerModesStringArray(this.randomPlayer, this.aiPlayer);
 		this.initializePiecePlayersMap(pieces);
 	}

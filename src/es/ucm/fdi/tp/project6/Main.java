@@ -22,13 +22,13 @@ import es.ucm.fdi.tp.basecode.bgame.model.Game;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 import es.ucm.fdi.tp.basecode.minmax.MinMax;
-import es.ucm.fdi.tp.project6.controller.SwingController;
+import es.ucm.fdi.tp.project6.controller.PlayersMap;
 import es.ucm.fdi.tp.project6.factories.AdvancedTTTFactoryExt;
 import es.ucm.fdi.tp.project6.factories.AtaxxFactoryExt;
 import es.ucm.fdi.tp.project6.factories.ConnectNFactoryExt;
 import es.ucm.fdi.tp.project6.factories.TicTacToeFactoryExt;
-import es.ucm.fdi.tp.project6.network.GameClient;
-import es.ucm.fdi.tp.project6.network.GameServer;
+import es.ucm.fdi.tp.project6.network.client.GameClient;
+import es.ucm.fdi.tp.project6.network.server.GameServer;
 
 /**
  * This is the class with the main method for the board games application.
@@ -100,8 +100,9 @@ public class Main {
 		 * See constructor below. If you have doubts, look for information about
 		 * enumerates inner classes in Java.
 		 */
-		CONNECTN("cn", "ConnectN"), TicTacToe("ttt", "Tic-Tac-Toe"), AdvancedTicTacToe(
-				"attt", "Advanced Tic-Tac-Toe"), ATAXX("ataxx", "Ataxx");
+		CONNECTN("cn", "ConnectN"), TicTacToe("ttt",
+				"Tic-Tac-Toe"), AdvancedTicTacToe("attt",
+						"Advanced Tic-Tac-Toe"), ATAXX("ataxx", "Ataxx");
 
 		private String id;
 		private String desc;
@@ -474,8 +475,8 @@ public class Main {
 		}
 
 		if (selectedMode == null) {
-			throw new ParseException("Uknown Application Mode '" + serverClient
-					+ "'");
+			throw new ParseException(
+					"Uknown Application Mode '" + serverClient + "'");
 		}
 
 		switch (selectedMode) {
@@ -524,10 +525,7 @@ public class Main {
 	}
 
 	private static Option constructPortOption() {
-		Option opt = new Option(
-				"sp",
-				"server-port",
-				true,
+		Option opt = new Option("sp", "server-port", true,
 				"The number of the Port where the Server is connectd or the Client needs to connect. By default, "
 						+ DEFAULT_SERVERPORT);
 		opt.setArgName("number");
@@ -602,8 +600,8 @@ public class Main {
 					: new MinMax(minmaxTreeDepth, false);
 			break;
 		case MINMAXAB:
-			aiPlayerAlg = minmaxTreeDepth == null ? new MinMax() : new MinMax(
-					minmaxTreeDepth);
+			aiPlayerAlg = minmaxTreeDepth == null ? new MinMax()
+					: new MinMax(minmaxTreeDepth);
 			break;
 		case NONE:
 			aiPlayerAlg = null;
@@ -674,7 +672,8 @@ public class Main {
 	 *             If an invalid value is provided (the valid values are those
 	 *             of {@link ViewInfo}.
 	 */
-	private static void parseViewOption(CommandLine line) throws ParseException {
+	private static void parseViewOption(CommandLine line)
+			throws ParseException {
 		String viewVal = line.getOptionValue("v", DEFAULT_VIEW.getId());
 		// view type
 		for (ViewInfo v : ViewInfo.values()) {
@@ -764,12 +763,12 @@ public class Main {
 					if (selectedMode != null) {
 						playerModes.add(selectedMode);
 					} else {
-						throw new ParseException("Invalid player mode in '"
-								+ player + "'");
+						throw new ParseException(
+								"Invalid player mode in '" + player + "'");
 					}
 				} else {
-					throw new ParseException("Invalid player information '"
-							+ player + "'");
+					throw new ParseException(
+							"Invalid player information '" + player + "'");
 				}
 			}
 		}
@@ -818,7 +817,8 @@ public class Main {
 	 *             Si se proporciona un valor invalido (Los valores validos son
 	 *             los de {@link GameInfo}).
 	 */
-	private static void parseGameOption(CommandLine line) throws ParseException {
+	private static void parseGameOption(CommandLine line)
+			throws ParseException {
 		String gameVal = line.getOptionValue("g", DEFAULT_GAME.getId());
 		GameInfo selectedGame = null;
 
@@ -919,10 +919,7 @@ public class Main {
 	 *         Objeto {@link Option} de esta opcion.
 	 */
 	private static Option constructDimensionOption() {
-		return new Option(
-				"d",
-				"dim",
-				true,
+		return new Option("d", "dim", true,
 				"The board size (if allowed by the selected game). It must has the form ROWSxCOLS.");
 	}
 
@@ -990,7 +987,8 @@ public class Main {
 	 *            CLI {@link Options} object to print the usage information.
 	 * 
 	 */
-	private static void parseHelpOption(CommandLine line, Options cmdLineOptions) {
+	private static void parseHelpOption(CommandLine line,
+			Options cmdLineOptions) {
 		if (line.hasOption("h")) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp(Main.class.getCanonicalName(), cmdLineOptions,
@@ -1012,8 +1010,8 @@ public class Main {
 			try {
 				obstacles = Integer.parseInt(obs);
 			} catch (NumberFormatException e) {
-				throw new ParseException("Invalid number of obstacles:"
-						+ obstacles);
+				throw new ParseException(
+						"Invalid number of obstacles:" + obstacles);
 			}
 		}
 	}
@@ -1100,9 +1098,7 @@ public class Main {
 			gameFactory.createConsoleView(g, c);
 			break;
 		case WINDOW:
-			c = new SwingController(g, pieces,
-					gameFactory.createRandomPlayer(),
-					gameFactory.createAIPlayer(aiPlayerAlg));
+			c = new Controller(g, pieces);
 
 			if (!multiviews) {
 				gameFactory.createSwingView(g, c, null,
@@ -1132,8 +1128,14 @@ public class Main {
 		return playerModesStringArray;
 	}
 
+	public static PlayersMap getPlayersMap() {
+		return new PlayersMap(pieces);
+	}
+
 	public static void main(String[] args) {
+
 		parseArgs(args);
+
 		switch (applicationMode) {
 		case NORMAL:
 			startGame();
@@ -1145,19 +1147,19 @@ public class Main {
 			startServer();
 			break;
 		}
+
 	}
 
 	private static void startServer() {
-		GameServer c = new GameServer(gameFactory, pieces, serverPort,
-				aiPlayerAlg);
+		GameServer c = new GameServer(gameFactory, pieces, serverPort);
 		c.start();
 	}
 
 	private static void startClient() {
 		try {
-			GameClient c = new GameClient(serverHost, serverPort, aiPlayerAlg);
+			GameClient c = new GameClient(serverHost, serverPort);
 			gameFactory = c.getGameFactory();
-			gameFactory.createSwingView(c, c.getSwingController(), c.getPlayerPiece(),
+			gameFactory.createSwingView(c, c, c.getPlayerPiece(),
 					gameFactory.createRandomPlayer(),
 					gameFactory.createAIPlayer(aiPlayerAlg));
 			c.start();
