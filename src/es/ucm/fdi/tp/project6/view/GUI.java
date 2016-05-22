@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 
 import es.ucm.fdi.tp.basecode.bgame.model.Board;
 import es.ucm.fdi.tp.basecode.bgame.model.Pair;
@@ -99,7 +100,6 @@ public class GUI extends JFrame {
 	 * 
 	 * @param board
 	 */
-	@Deprecated
 	public void setBoard(Board board) {
 		this.boardPanel.setBoard(board);
 	}
@@ -113,9 +113,11 @@ public class GUI extends JFrame {
 	 * @param turn
 	 */
 	public void update(Integer selectedRow, Integer selectedColumn,
-			List<Pair<Integer, Integer>> filter, Piece turn) {
+			List<Pair<Integer, Integer>> filter, Piece turn, Board board) {
+		this.setBoard(board);
 		this.boardPanel.update(selectedRow, selectedColumn, filter, turn);
 		this.lateralPanel.updateTable();
+		SwingUtilities.updateComponentTreeUI(this);
 		this.repaint();
 	}
 

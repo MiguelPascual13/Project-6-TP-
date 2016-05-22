@@ -15,6 +15,6 @@ public class ChangeTurnResponse implements Response {
 	}
 
 	public void run(GameObserver observer) {
-		observer.onChangeTurn(board, turn);
+		observer.onChangeTurn(this.board, this.turn);
 	}
 }

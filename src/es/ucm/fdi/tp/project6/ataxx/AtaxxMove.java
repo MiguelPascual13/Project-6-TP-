@@ -99,7 +99,7 @@ public class AtaxxMove extends GameMove {
 	@Override
 	public void execute(Board board, List<Piece> pieces) {
 		/* When we do things legally... */
-		if (board.getPosition(oldRow, oldCol) == getPiece()) {
+		if (board.getPosition(oldRow, oldCol).equals(getPiece())) {
 			/* When we move to an empty position... */
 			if (board.getPosition(row, col) == null) {
 				if (infiniteDistance() == 1) {
@@ -189,7 +189,7 @@ public class AtaxxMove extends GameMove {
 			Piece p;
 			if (inBoard(x, y, board.getRows())
 					&& (p = board.getPosition(x, y)) != null && !isObstacle(p)
-					&& p.getId() != getPiece().getId()) {
+					&& !p.getId().equals(getPiece().getId())) {
 				board.setPieceCount(p, board.getPieceCount(p) - 1);
 				board.setPieceCount(getPiece(),
 						board.getPieceCount(getPiece()) + 1);
@@ -206,7 +206,7 @@ public class AtaxxMove extends GameMove {
 	 * @return {@code true} if is and obstacle, {@code false} if not.
 	 */
 	private boolean isObstacle(Piece p) {
-		return p.getId() == Main.OBSTACLE;
+		return p.getId().equals(Main.OBSTACLE);
 	}
 
 	/**

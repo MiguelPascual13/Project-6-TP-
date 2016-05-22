@@ -52,6 +52,8 @@ public class GenericSwingView implements GameObserver {
 	private Player random;
 	private Player ai;
 
+	private Board board;
+
 	/**
 	 * Constructor to match the arguments of the method createSwing view in the
 	 * factories of the basecode.
@@ -89,25 +91,25 @@ public class GenericSwingView implements GameObserver {
 	public void onGameStart(Board board, String gameDesc, List<Piece> pieces,
 			Piece turn) {
 
+		this.board = board;
+
 		/* to avoid strange behaviors in case of restarting */
 		if (gui != null)
 			gui.dispose();
 
 		this.actualTurn = turn;
 
-		gui = new GUI(board, pieces, colorChooser, turn, moveController,
-				this.viewPiece, playersMap,
-				this.getQuitButtonListener(controller),
-				this.getRestartButtonListener(controller),
-				this.getRandomButtonListener(board),
-				this.getIntelligentButtonListener(board),
-				this.getColorChangeListener(board),
-				this.getPlayerModesChangeListener(board),
-				this.getCellClickedListener(board));
+		gui = new GUI(this.board, pieces, colorChooser, turn, moveController,
+				this.viewPiece, playersMap, this.getQuitButtonListener(),
+				this.getRestartButtonListener(), this.getRandomButtonListener(),
+				this.getIntelligentButtonListener(),
+				this.getColorChangeListener(),
+				this.getPlayerModesChangeListener(),
+				this.getCellClickedListener());
 
 		setGUITitle(gameDesc);
 		checkForDisablingButtons();
-		update(board);
+		update();
 		gui.appendToStatusMessagePanel(
 				startingMessage + "'" + gameDesc + "'\n");
 		if (viewPiece != null && this.viewPiece.equals(this.actualTurn)) {
@@ -123,7 +125,8 @@ public class GenericSwingView implements GameObserver {
 
 	@Override
 	public void onGameOver(Board board, State state, Piece winner) {
-		update(board);
+		this.board = board;
+		update();
 
 		gui.appendToStatusMessagePanel(gameOverMessage);
 		gui.appendToStatusMessagePanel(gameStatusMessage + state + "\n");
@@ -142,25 +145,30 @@ public class GenericSwingView implements GameObserver {
 			disableQuitButton(false);
 		}
 
-		update(board);
+		update();
 	}
 
 	@Override
 	public void onMoveStart(Board board, Piece turn) {
+		this.board = board;
+		update();
 	}
 
 	@Override
 	public void onMoveEnd(Board board, Piece turn, boolean success) {
+		this.board = board;
+		update();
 	}
 
 	@Override
 	public void onChangeTurn(Board board, Piece turn) {
+		this.board = board;
 		this.actualTurn = turn;
 		checkForDisablingButtons();
 		appendChangeTurnMessage();
 		checkForMoreMoveIndications();
-		update(board);
-		checkForAutomaticMoves(board);
+		update();
+		checkForAutomaticMoves();
 	}
 
 	@Override
@@ -172,25 +180,26 @@ public class GenericSwingView implements GameObserver {
 		}
 	}
 
-	private void randomMakeMove(Board board) {
+	private void randomMakeMove() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				controller.makeMove(random);
-				update(board);
+				update();
 			}
 		});
 	}
 
-	private void intelligentMakeMove(Board board) {
+	private void intelligentMakeMove() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				controller.makeMove(ai);
-				update(board);
+				update();
 			}
 		});
 	}
 
-	private QuitButtonListener getQuitButtonListener(Controller controller) {
+	private QuitButtonListener getQuitButtonListener() {
+
 		return new QuitButtonListener() {
 
 			@Override
@@ -201,7 +210,7 @@ public class GenericSwingView implements GameObserver {
 						"Are you sure you want to quit?", "Quit",
 						JOptionPane.YES_NO_OPTION);
 				if (n == JOptionPane.YES_OPTION) {
-					controller.stop();
+					GenericSwingView.this.controller.stop();
 					System.exit(0);
 				} else {
 					ventanaQuit.dispose();
@@ -213,57 +222,57 @@ public class GenericSwingView implements GameObserver {
 
 	/*-----LISTENERS-----*/
 
-	private RestartButtonListener getRestartButtonListener(
-			Controller controller) {
+	private RestartButtonListener getRestartButtonListener() {
 		return new RestartButtonListener() {
 
 			@Override
 			public void RestartButtonClicked() {
 				gui.dispose();
 				gui = null;
-				controller.restart();
+				GenericSwingView.this.controller.restart();
 			}
 
 		};
 	}
 
-	private RandomButtonListener getRandomButtonListener(Board board) {
+	private RandomButtonListener getRandomButtonListener() {
 		return new RandomButtonListener() {
 
 			@Override
 			public void RandomButtonClicked() {
-				randomMakeMove(board);
+				randomMakeMove();
 			}
 
 		};
 	}
 
-	private IntelligentButtonListener getIntelligentButtonListener(
-			Board board) {
+	private IntelligentButtonListener getIntelligentButtonListener() {
+
 		return new IntelligentButtonListener() {
 
 			@Override
 			public void IntelligentButtonClicked() {
-				intelligentMakeMove(board);
+				intelligentMakeMove();
 			}
 
 		};
 	}
 
-	private ColorChangeListener getColorChangeListener(Board board) {
+	private ColorChangeListener getColorChangeListener() {
+
 		return new ColorChangeListener() {
 
 			@Override
 			public void colorChanged(Piece piece, Color color) {
 				colorChooser.setColorFor(piece, color);
-				update(board);
+				update();
 			}
 
 		};
 	}
 
-	private PlayerModesChangeListener getPlayerModesChangeListener(
-			Board board) {
+	private PlayerModesChangeListener getPlayerModesChangeListener() {
+
 		return new PlayerModesChangeListener() {
 
 			@Override
@@ -272,26 +281,26 @@ public class GenericSwingView implements GameObserver {
 					playersMap.setPlayerType(piece, mode);
 					checkForDisablingButtons();
 				}
-				update(board);
+				update();
 			}
 
 		};
 	}
 
-	private CellClickedListener getCellClickedListener(Board board) {
+	private CellClickedListener getCellClickedListener() {
 		return new CellClickedListener() {
-
 			@Override
 			public void cellWasClicked(int row, int column, MouseEvent e) {
-				Integer answer = moveController.manageClicks(board, row, column,
-						actualTurn, viewPiece, e, getMoveStateChangeListener());
+				Integer answer = moveController.manageClicks(
+						GenericSwingView.this.board, row, column, actualTurn,
+						viewPiece, e, getMoveStateChangeListener());
 				if (answer != null) {
 					if (answer.equals(MoveController.REPAINT_AND_MOVE)) {
 						controller.makeMove(moveController);
-						update(board);
+						update();
 					} else if (answer
 							.equals(MoveController.SOMETHING_TO_REPAINT)) {
-						update(board);
+						update();
 					}
 				}
 			}
@@ -338,14 +347,14 @@ public class GenericSwingView implements GameObserver {
 		}
 	}
 
-	private void checkForAutomaticMoves(Board board) {
+	private void checkForAutomaticMoves() {
 		if (viewPiece == null || actualTurn.equals(viewPiece)) {
 			if (playersMap.isPlayerOfType(this.actualTurn,
 					playersMap.getPlayerModeString(PlayersMap.RANDOM))) {
-				randomMakeMove(board);
+				randomMakeMove();
 			} else if (playersMap.isPlayerOfType(this.actualTurn,
 					playersMap.getPlayerModeString(PlayersMap.INTELLIGENT))) {
-				intelligentMakeMove(board);
+				intelligentMakeMove();
 			}
 		}
 	}
@@ -385,10 +394,11 @@ public class GenericSwingView implements GameObserver {
 		gui.disableRestartButton(disable);
 	}
 
-	private void update(Board board) {
+	private void update() {
 		gui.update(moveController.getSelectedRow(),
 				moveController.getSelectedColumn(),
-				moveController.getFilterOnCells(board), actualTurn);
+				moveController.getFilterOnCells(this.board), this.actualTurn,
+				this.board);
 	}
 
 	/**
@@ -401,7 +411,7 @@ public class GenericSwingView implements GameObserver {
 				playersMap.getPlayerModeString(PlayersMap.MANUAL))) {
 			gui.appendToStatusMessagePanel(
 					moveController.notifyMoveStartInstructions());
-		} else if (viewPiece.equals(actualTurn)
+		} else if (viewPiece != null && viewPiece.equals(actualTurn)
 				&& playersMap.isPlayerOfType(actualTurn,
 						playersMap.getPlayerModeString(PlayersMap.MANUAL))) {
 			gui.appendToStatusMessagePanel(

@@ -231,9 +231,10 @@ public class AtaxxRules implements GameRules {
 		Piece winnerPiece = wonPlayer(board, playersPieces);
 		// linear again.
 		for (int i = 0; i < playersPieces.size(); i++) {
-			if (board.getPieceCount(playersPieces.get(i)) == board
-					.getPieceCount(winnerPiece)
-					&& playersPieces.get(i).getId() != winnerPiece.getId()) {
+			if (board.getPieceCount(playersPieces.get(i))
+					.equals(board.getPieceCount(winnerPiece))
+					&& !playersPieces.get(i).getId()
+							.equals(winnerPiece.getId())) {
 				equal = true;
 			}
 		}
@@ -275,7 +276,8 @@ public class AtaxxRules implements GameRules {
 		List<GameMove> moves = new ArrayList<GameMove>();
 		for (int i = 0; i < dim; i++) {
 			for (int j = 0; j < dim; j++) {
-				if (board.getPosition(i, j) == turn) {
+				if (board.getPosition(i, j) != null
+						&& board.getPosition(i, j).equals(turn)) {
 					for (int[] ds : deltas) {
 						int x = i + ds[0];
 						int y = j + ds[1];
@@ -305,14 +307,14 @@ public class AtaxxRules implements GameRules {
 			int x = board.getPieceCount(q);
 			maxOfOtherPieces = Math.max(x, maxOfOtherPieces);
 		}
-		
+
 		if (ourPieces - lossCoefficient == 0)
 			return -1;
 		else if (gainCoefficient - maxOfOtherPieces == 0)
 			return 1;
 		else
-			return (double)(ourPieces - lossCoefficient + gainCoefficient
-					- maxOfOtherPieces) / (double)(dim * dim - obstacles);
+			return (double) (ourPieces - lossCoefficient + gainCoefficient
+					- maxOfOtherPieces) / (double) (dim * dim - obstacles);
 	}
 
 	private Pair<Integer, Integer> calculateCoefficients(
@@ -365,7 +367,7 @@ public class AtaxxRules implements GameRules {
 			int x = row + ds[0];
 			int y = column + ds[1];
 			if (enemy != null) {
-				if (inBoard(x, y) && board.getPosition(x, y) == enemy)
+				if (inBoard(x, y) && board.getPosition(x, y).equals(enemy))
 					eaten++;
 			} else {
 				if (inBoard(x, y) && board.getPosition(x, y) != null)
