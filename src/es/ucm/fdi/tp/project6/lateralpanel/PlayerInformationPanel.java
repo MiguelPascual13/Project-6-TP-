@@ -97,7 +97,7 @@ public class PlayerInformationPanel extends JPanel {
 
 	static class MyTableModel extends AbstractTableModel {
 
-		private String[] columnName;
+		private String[] columnNames;
 		private List<Piece> pieces;
 		private Board board;
 		private Piece viewPiece;
@@ -106,16 +106,16 @@ public class PlayerInformationPanel extends JPanel {
 		/**
 		 * Constructor of the Table Model static class.
 		 * @param pieces
-		 * @param columnName
+		 * @param columnNames
 		 * @param board
 		 * @param viewPiece
 		 * @param controller
 		 */
 
-		public MyTableModel(List<Piece> pieces, String[] columnName,
+		public MyTableModel(List<Piece> pieces, String[] columnNames,
 				Board board, Piece viewPiece, PlayersMap playersMap) {
 			this.pieces = pieces;
-			this.columnName = columnName;
+			this.columnNames = columnNames;
 			this.board = board;
 			this.viewPiece = viewPiece;
 			this.playersMap = playersMap;
@@ -133,7 +133,7 @@ public class PlayerInformationPanel extends JPanel {
 
 		@Override
 		public int getColumnCount() {
-			return columnName.length;
+			return columnNames.length;
 		}
 
 		@Override
