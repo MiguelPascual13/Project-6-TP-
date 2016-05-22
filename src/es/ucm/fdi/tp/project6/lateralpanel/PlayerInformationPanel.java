@@ -28,10 +28,8 @@ import es.ucm.fdi.tp.project6.utils.PieceColorMap;
 @SuppressWarnings("serial")
 public class PlayerInformationPanel extends JPanel {
 	private static final String PANEL_NAME_TEXT = "Player Information";
-	private static final String COL1 = "Player";
-	private static final String COL2 = "Mode";
-	private static final String COL3 = "#Pieces";
 	private static final String UNKNOWN = "-";
+	private static final String columNames[] = {"Player", "Mode", "#Pieces"};
 
 	private JScrollPane scrollPane;
 	private JTable table;
@@ -56,12 +54,11 @@ public class PlayerInformationPanel extends JPanel {
 		super(new BorderLayout());
 		this.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEtchedBorder(), PANEL_NAME_TEXT));
-
-		String columName[] = { COL1, COL2, COL3 };
-		table = new JTable(new MyTableModel(pieces, columName, board, viewPiece,
+		
+		table = new JTable(new MyTableModel(pieces, columNames, board, viewPiece,
 				playersMap));
-		for (int i = 0; i < 3; i++) {
-			table.getColumnModel().getColumn(i).setHeaderValue(columName[i]);
+		for (int i = 0; i < columNames.length; i++) {
+			table.getColumnModel().getColumn(i).setHeaderValue(columNames[i]);
 		}
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
