@@ -110,7 +110,7 @@ public class GenericSwingView implements GameObserver {
 		update(board);
 		gui.appendToStatusMessagePanel(
 				startingMessage + "'" + gameDesc + "'\n");
-		if (this.viewPiece == this.actualTurn) {
+		if (this.viewPiece.equals(this.actualTurn)) {
 			gui.appendToStatusMessagePanel(
 					changeTurnMessage + youMessage + this.actualTurn + "\n");
 		} else {
@@ -165,7 +165,7 @@ public class GenericSwingView implements GameObserver {
 
 	@Override
 	public void onError(String msg) {
-		if (viewPiece == null || viewPiece == actualTurn) {
+		if (viewPiece == null || viewPiece.equals(actualTurn)) {
 			JOptionPane.showMessageDialog(new JFrame(), msg, "Game error",
 					JOptionPane.ERROR_MESSAGE);
 			gui.appendToStatusMessagePanel(msg + "\n");
@@ -327,7 +327,7 @@ public class GenericSwingView implements GameObserver {
 	}
 
 	private void appendChangeTurnMessage() {
-		if (this.viewPiece == this.actualTurn) {
+		if (this.viewPiece.equals(this.actualTurn)) {
 			gui.appendToStatusMessagePanel(
 					changeTurnMessage + youMessage + this.actualTurn + "\n");
 		} else {
@@ -337,7 +337,7 @@ public class GenericSwingView implements GameObserver {
 	}
 
 	private void checkForAutomaticMoves(Board board) {
-		if (viewPiece == null || actualTurn == viewPiece) {
+		if (viewPiece == null || actualTurn.equals(viewPiece)) {
 			if (playersMap.isPlayerOfType(this.actualTurn,
 					playersMap.getPlayerModeString(PlayersMap.RANDOM))) {
 				randomMakeMove(board);
@@ -352,10 +352,10 @@ public class GenericSwingView implements GameObserver {
 	 * Checks if we have to disable some buttons in the lateral panel.
 	 */
 	private void checkForDisablingButtons() {
-		if (this.viewPiece != null && this.viewPiece != this.actualTurn) {
+		if (this.viewPiece != null && !this.viewPiece.equals(this.actualTurn)) {
 			gui.disableAutomaticMoves(true);
 			disableQuitButton(true);
-		} else if (viewPiece == this.actualTurn) {
+		} else if (viewPiece.equals(this.actualTurn)) {
 			if (!playersMap.isPlayerOfType(actualTurn,
 					playersMap.getPlayerModeString(PlayersMap.MANUAL))) {
 				gui.disableAutomaticMoves(true);
@@ -399,7 +399,7 @@ public class GenericSwingView implements GameObserver {
 				playersMap.getPlayerModeString(PlayersMap.MANUAL))) {
 			gui.appendToStatusMessagePanel(
 					moveController.notifyMoveStartInstructions());
-		} else if (viewPiece == actualTurn && playersMap.isPlayerOfType(
+		} else if (viewPiece.equals(actualTurn) && playersMap.isPlayerOfType(
 				actualTurn,
 				playersMap.getPlayerModeString(PlayersMap.MANUAL))) {
 			gui.appendToStatusMessagePanel(

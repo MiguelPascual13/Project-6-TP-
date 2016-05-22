@@ -58,7 +58,7 @@ public class PieceColorMap {
 	}
 
 	private boolean isObstacle(Piece piece) {
-		return piece.getId() == Main.OBSTACLE;
+		return piece.getId().equals(Main.OBSTACLE);
 	}
 
 	public void setColorFor(Piece piece, Color color) {
