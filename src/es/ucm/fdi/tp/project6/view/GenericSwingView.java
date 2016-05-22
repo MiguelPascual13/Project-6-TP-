@@ -106,7 +106,7 @@ public class GenericSwingView implements GameObserver {
 				this.getCellClickedListener(board));
 
 		setGUITitle(gameDesc);
-		checkForDisablingButtons(); //AQUI SE PRODUCE EL FALLO PERO NO LO PROVOCA ESTO, SE PROVOCA ANTES AL CREAR EL FACTORY.
+		checkForDisablingButtons();
 		update(board);
 		gui.appendToStatusMessagePanel(
 				startingMessage + "'" + gameDesc + "'\n");
