@@ -110,7 +110,7 @@ public class GenericSwingView implements GameObserver {
 		update(board);
 		gui.appendToStatusMessagePanel(
 				startingMessage + "'" + gameDesc + "'\n");
-		if (this.viewPiece.equals(this.actualTurn)) {
+		if (viewPiece != null && this.viewPiece.equals(this.actualTurn)) {
 			gui.appendToStatusMessagePanel(
 					changeTurnMessage + youMessage + this.actualTurn + "\n");
 		} else {
@@ -329,7 +329,7 @@ public class GenericSwingView implements GameObserver {
 	}
 
 	private void appendChangeTurnMessage() {
-		if (this.viewPiece.equals(this.actualTurn)) {
+		if (this.viewPiece != null && this.viewPiece.equals(this.actualTurn)) {
 			gui.appendToStatusMessagePanel(
 					changeTurnMessage + youMessage + this.actualTurn + "\n");
 		} else {
@@ -357,7 +357,7 @@ public class GenericSwingView implements GameObserver {
 		if (this.viewPiece != null && !this.viewPiece.equals(this.actualTurn)) {
 			gui.disableAutomaticMoves(true);
 			disableQuitButton(true);
-		} else if (viewPiece.equals(this.actualTurn)) {
+		} else if (viewPiece != null && viewPiece.equals(this.actualTurn)) {
 			if (!playersMap.isPlayerOfType(actualTurn,
 					playersMap.getPlayerModeString(PlayersMap.MANUAL))) {
 				gui.disableAutomaticMoves(true);
