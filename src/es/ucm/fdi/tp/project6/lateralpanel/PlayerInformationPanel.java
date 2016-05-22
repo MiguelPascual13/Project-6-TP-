@@ -17,45 +17,34 @@ import es.ucm.fdi.tp.basecode.bgame.model.Board;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 import es.ucm.fdi.tp.project6.controller.PlayersMap;
 import es.ucm.fdi.tp.project6.utils.PieceColorMap;
-
 /**
  * PlayerInformationPanel Class
  * 
- * This Class contains the JPanel component which shows the pieces, their Player
- * Mode and their number of pieces on game, in case it's needed for example in
- * Ataxx or in Advanced Tic-Tac-Toe.
+ * This Class contains the JPanel component which shows the pieces, their Player Mode and their number of pieces on game,
+ *  in case it's needed for example in Ataxx or in Advanced Tic-Tac-Toe. 
  * 
  *
  */
 @SuppressWarnings("serial")
 public class PlayerInformationPanel extends JPanel {
 	private static final String PANEL_NAME_TEXT = "Player Information";
-	private static final String COL1 = "Player";
-	private static final String COL2 = "Mode";
-	private static final String COL3 = "#Pieces";
 	private static final String UNKNOWN = "-";
+	private static final String columNames[] = {"Player", "Mode", "#Pieces"};
 
 	private JScrollPane scrollPane;
 	private JTable table;
-
+	
 	/**
 	 * 
-	 * Constructor of this component. In this constructor is created everything
-	 * is needed for the function part of the table. Such as all the renderer of
-	 * the color background of each row, the scrollpane in case it's needed, the
-	 * border and the resize modes.
+	 * Constructor of this component. In this constructor is created everything is needed for the function part of the table. 
+	 * Such as all the renderer of the color background of each row, 
+	 * the scrollpane in case it's needed, the border and the resize modes. 
 	 * 
-	 * @param pieces
-	 *            The list of pieces on game.
-	 * @param board
-	 *            The board where the game is played.
-	 * @param colorChooser
-	 *            A hash map which relate a piece with his color.
-	 * @param viewPiece
-	 *            The Piece or "Player" in which view we are. In case the
-	 *            multiviews option is not on, it is null.
-	 * @param controller
-	 *            The controller of the game on play.
+	 * @param pieces The list of pieces on game. 
+	 * @param board The board where the game is played. 
+	 * @param colorChooser A hash map which relate a piece with his color. 
+	 * @param viewPiece The Piece or "Player" in which view we are. In case the multiviews option is not on, it is null.
+	 * @param controller The controller of the game on play. 
 	 */
 
 	public PlayerInformationPanel(List<Piece> pieces, Board board,
@@ -65,24 +54,11 @@ public class PlayerInformationPanel extends JPanel {
 		super(new BorderLayout());
 		this.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEtchedBorder(), PANEL_NAME_TEXT));
-
-		setTable(pieces, board, viewPiece, playersMap, colorChooser);
-	}
-
-	/**
-	 * Method used for update the Table information when needed. For example
-	 * when the Player Mode, has been modified or when a move has ocurred and
-	 * the number of pieces has changed.
-	 *
-	 */
-
-	public void setTable(List<Piece> pieces, Board board, Piece viewPiece,
-			PlayersMap playersMap, PieceColorMap colorChooser) {
-		String columnName[] = { COL1, COL2, COL3 };
-		this.table = new JTable(new MyTableModel(pieces, columnName, board,
-				viewPiece, playersMap));
-		for (int i = 0; i < 3; i++) {
-			table.getColumnModel().getColumn(i).setHeaderValue(columnName[i]);
+		
+		table = new JTable(new MyTableModel(pieces, columNames, board, viewPiece,
+				playersMap));
+		for (int i = 0; i < columNames.length; i++) {
+			table.getColumnModel().getColumn(i).setHeaderValue(columNames[i]);
 		}
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
@@ -99,41 +75,47 @@ public class PlayerInformationPanel extends JPanel {
 
 		});
 		scrollPane = new JScrollPane(table);
-		this.setMaximumSize(
-				new Dimension(250, ((pieces.size() + 1) * 16) + 16));
-		this.setMinimumSize(new Dimension(150, (pieces.size() * 16) + 16));
+		this.setMaximumSize(new Dimension(250, ((pieces.size()+1)*16)+16));
+		this.setMinimumSize(new Dimension(150, (pieces.size()*16)+16));
 		this.add(scrollPane);
 	}
+	/**
+	 * Method used for update the Table information when needed.
+	 * For example when the Player Mode, has been modified or when a move has ocurred and the number of pieces has changed. 
+	 *
+	 */
 
+	public void updateTableInfo() {
+		this.repaint();
+	}
+	
 	/**
 	 * 
-	 * Static Class made for the construction of the JTable which provided the
-	 * Table Model used to create it.
+	 * Static Class made for the construction of the JTable which provided the Table Model used to create it. 
 	 *
 	 */
 
 	static class MyTableModel extends AbstractTableModel {
 
-		private String[] columnName;
+		private String[] columnNames;
 		private List<Piece> pieces;
 		private Board board;
 		private Piece viewPiece;
 		private PlayersMap playersMap;
-
+		
 		/**
 		 * Constructor of the Table Model static class.
-		 * 
 		 * @param pieces
-		 * @param columnName
+		 * @param columnNames
 		 * @param board
 		 * @param viewPiece
 		 * @param controller
 		 */
 
-		public MyTableModel(List<Piece> pieces, String[] columnName,
+		public MyTableModel(List<Piece> pieces, String[] columnNames,
 				Board board, Piece viewPiece, PlayersMap playersMap) {
 			this.pieces = pieces;
-			this.columnName = columnName;
+			this.columnNames = columnNames;
 			this.board = board;
 			this.viewPiece = viewPiece;
 			this.playersMap = playersMap;
@@ -151,7 +133,7 @@ public class PlayerInformationPanel extends JPanel {
 
 		@Override
 		public int getColumnCount() {
-			return columnName.length;
+			return columnNames.length;
 		}
 
 		@Override
@@ -168,11 +150,10 @@ public class PlayerInformationPanel extends JPanel {
 
 		/**
 		 * Identifies what the table needs to show a number or a -.
-		 * 
 		 * @param row
 		 * @return The string to show in the cell (row, 3) of the table.
 		 */
-
+		
 		public String stringPieceCount(int row) {
 			Integer pieceCount = board.getPieceCount(pieces.get(row));
 			if (pieceCount != null) {
@@ -181,26 +162,27 @@ public class PlayerInformationPanel extends JPanel {
 				return UNKNOWN;
 			}
 		}
-
+		
 		/**
 		 * Identifies what the table needs to show a word or a -.
-		 * 
 		 * @param row
 		 * @return The string to show in the cell (row, 2) of the table.
 		 */
 
 		public String stringMode(int row) {
 			if (viewPiece == null || viewPiece.equals(pieces.get(row))) {
-				if (this.playersMap.isPlayerOfType(pieces.get(row),
-						playersMap.getPlayerModeString(PlayersMap.RANDOM))) {
-					return playersMap.getPlayerModeString(PlayersMap.RANDOM);
+				if (this.playersMap.isPlayerOfType(pieces.get(row), playersMap
+						.getPlayerModeString(PlayersMap.RANDOM))) {
+					return playersMap
+							.getPlayerModeString(PlayersMap.RANDOM);
 				} else if (this.playersMap.isPlayerOfType(pieces.get(row),
-						playersMap
-								.getPlayerModeString(PlayersMap.INTELLIGENT))) {
+						playersMap.getPlayerModeString(
+								PlayersMap.INTELLIGENT))) {
 					return playersMap
 							.getPlayerModeString(PlayersMap.INTELLIGENT);
 				} else {
-					return playersMap.getPlayerModeString(PlayersMap.MANUAL);
+					return playersMap
+							.getPlayerModeString(PlayersMap.MANUAL);
 				}
 			} else {
 				return UNKNOWN;
@@ -210,10 +192,6 @@ public class PlayerInformationPanel extends JPanel {
 
 		public boolean isCellEditable(int row, int col) {
 			return false;
-		}
-
-		public void setBoard(Board board) {
-			this.board = board;
 		}
 	}
 }

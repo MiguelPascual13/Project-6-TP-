@@ -62,8 +62,7 @@ public class LateralPanel extends JPanel {
 
 	public void updateTable(List<Piece> pieces, Board board, Piece viewPiece,
 			PlayersMap playersMap, PieceColorMap colorChooser) {
-		this.playerInformationPanel.setTable(pieces, board, viewPiece,
-				playersMap, colorChooser);
+		//HACERRRR
 	}
 
 	public void appendToStatusMessagePanel(String message) {
