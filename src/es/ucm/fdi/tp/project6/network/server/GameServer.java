@@ -196,7 +196,7 @@ public class GameServer extends Controller implements GameObserver {
 
 			/* Enviamos al cliente lo necesario. */
 			connection.sendObject(this.gameFactory);
-			connection.sendObject(this.pieces.get(currentClients - 1));
+			connection.sendObject(this.pieces.get(clients.size() - 1));
 
 			/* Cuando estén los justos se inicia el juego */
 			if (this.currentClients == this.requiredClients) {
