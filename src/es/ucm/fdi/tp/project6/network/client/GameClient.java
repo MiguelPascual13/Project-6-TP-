@@ -161,7 +161,8 @@ public class GameClient extends Controller implements Observable<GameObserver> {
 				GameClient.this.gameOver = true;
 				try {
 					GameClient.this.connectionToServer.stop();
-					GameClient.this.game.stop();
+					if (GameClient.this.game != null)
+						GameClient.this.game.stop();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

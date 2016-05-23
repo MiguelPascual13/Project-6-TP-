@@ -359,7 +359,16 @@ public class AtaxxRules implements GameRules {
 		return coefficient;
 	}
 
-	// if null we don´t care about the enemy.
+	/**
+	 * Returns the number of pieces that can be eaten when we move to the (row,
+	 * column) position
+	 * 
+	 * @param board
+	 * @param row
+	 * @param column
+	 * @param enemy if the enemy is null, we count all the non-yours pieces
+	 * @return
+	 */
 	private int howManyAreEaten(Board board, int row, int column, Piece enemy) {
 		int eaten = 0;
 
@@ -370,7 +379,8 @@ public class AtaxxRules implements GameRules {
 				if (inBoard(x, y) && board.getPosition(x, y).equals(enemy))
 					eaten++;
 			} else {
-				if (inBoard(x, y) && board.getPosition(x, y) != null)
+				if (inBoard(x, y) && board.getPosition(x, y) != null
+						&& !board.getPosition(x, y).equals(obstacle))
 					eaten++;
 			}
 		}

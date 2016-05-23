@@ -7,26 +7,12 @@
 
 	Atendiendo a las correcciones de la práctica 5:
 	
-	//HECHO
-	
 	*Cambios en el sistema de generación de colores (antes era un código muy extraño).
 	*Como compilamos con Java8 hemos decidido omitir los final.
 	*Hemos corregido los errores de estilo (mayúsculas en los métodos).
 	*Hemos sacado variables a atributos en GenericSwingView (tal y como nos recomendabas).
 	*Hemos cambiado algunos errores de estilo (plurales y codigo innecesario) en PLayerInformationPanel
 	*Supresión de SwingController (mala herencia). Sustitución por la clase PlayersMap.
-	
-	//POR HACER (SE COMO)
-
-	*Cambio de disableX por enableX (principio de mínima sorpresa).
-	*Supresión de la clase Utils (infrautilizada).
-
-	//POR HACER (NO SE COMO)
-	
-	*Uso de enums en los moveController.
-	*Corrección del código excesiva e innecesariamente complejo de PlayersMap (uso de enums).
-
-	//MEJORAR EL JUGADOR INTELIGENTE (SE MÁS O MENOS COMO)
 
 ---Cosas que serán cambiadas en la entrega del domingo---
 
@@ -36,7 +22,14 @@
 	*Repartición del código en paquetes.
 	*Cambios en getFilterOnCells usando Point y Sets.
 	*Mejoras en la claridad de la documentación.
+	*Uso de enums en los moveController.
+	*Corrección del código excesiva e innecesariamente complejo de PlayersMap (uso de enums).
+	*Cambio de disableX por enableX (principio de mínima sorpresa).
+	*Supresión de la clase Utils (infrautilizada).
 
 ---Otros Comentarios---
 	El enunciado no es demasiado claro en cuando a qué debemos hacer para rechazar conexiones,
 	nosotros simplemente mandamos una excepción al cliente, quien la relanza. (Quizá es un poco feo).
+
+	Es posible que en el basecode haya algún cambio accidental (algún control-shift-f involuntario) pero
+	en ningún caso afecta a la funcionalidad. Creemos que funciona correctamente.
