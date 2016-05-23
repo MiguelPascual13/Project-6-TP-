@@ -240,7 +240,6 @@ public class GameServer extends Controller implements GameObserver {
 					} catch (ClassNotFoundException | IOException e) {
 						if (!stopped && !gameOver) {
 							game.stop();
-							stopped = true;
 							e.printStackTrace();
 						}
 					}
