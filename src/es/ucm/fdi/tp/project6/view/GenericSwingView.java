@@ -142,9 +142,9 @@ public class GenericSwingView implements GameObserver {
 
 		if (viewPiece == null) {
 			disableRestartButton(false);
-			disableQuitButton(false);
 		}
-
+		gui.disableAutomaticMoves(true);
+		disableQuitButton(false);
 		update();
 	}
 
@@ -199,7 +199,7 @@ public class GenericSwingView implements GameObserver {
 		return new QuitButtonListener() {
 
 			@Override
-			public void QuitButtonClicked() {
+			public void quitButtonClicked() {
 
 				JFrame ventanaQuit = new JFrame();
 				int n = JOptionPane.showConfirmDialog(ventanaQuit,
@@ -222,7 +222,7 @@ public class GenericSwingView implements GameObserver {
 		return new RestartButtonListener() {
 
 			@Override
-			public void RestartButtonClicked() {
+			public void restartButtonClicked() {
 				gui.dispose();
 				gui = null;
 				GenericSwingView.this.controller.restart();
@@ -235,7 +235,7 @@ public class GenericSwingView implements GameObserver {
 		return new RandomButtonListener() {
 
 			@Override
-			public void RandomButtonClicked() {
+			public void randomButtonClicked() {
 				randomMakeMove();
 			}
 
@@ -247,7 +247,7 @@ public class GenericSwingView implements GameObserver {
 		return new IntelligentButtonListener() {
 
 			@Override
-			public void IntelligentButtonClicked() {
+			public void intelligentButtonClicked() {
 				intelligentMakeMove();
 			}
 
@@ -272,7 +272,7 @@ public class GenericSwingView implements GameObserver {
 		return new PlayerModesChangeListener() {
 
 			@Override
-			public void SetButtonClicked(Piece piece, String mode) {
+			public void setButtonClicked(Piece piece, String mode) {
 				if (playersMap.getPlayerType(piece) != mode) {
 					playersMap.setPlayerType(piece, mode);
 					checkForDisablingButtons();

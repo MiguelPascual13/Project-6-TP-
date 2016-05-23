@@ -18,11 +18,11 @@ public class QuitRestartPanel extends JPanel {
 	private JButton restartButton;
 
 	public interface QuitButtonListener {
-		void QuitButtonClicked();
+		void quitButtonClicked();
 	}
 
 	public interface RestartButtonListener {
-		void RestartButtonClicked();
+		void restartButtonClicked();
 	}
 
 	public QuitRestartPanel(QuitButtonListener quitButtonListener,
@@ -35,14 +35,14 @@ public class QuitRestartPanel extends JPanel {
 		this.add(quitButton);
 		quitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				quitButtonListener.QuitButtonClicked();
+				quitButtonListener.quitButtonClicked();
 			}
 		});
 		if (viewPiece == null) {
 			this.add(restartButton);
 			restartButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					restartButtonListener.RestartButtonClicked();
+					restartButtonListener.restartButtonClicked();
 				}
 			});
 		}

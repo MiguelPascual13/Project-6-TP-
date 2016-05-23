@@ -19,11 +19,11 @@ public class AutomaticMovesPanel extends JPanel {
 	private List<JButton> playerModeButtons;
 
 	public interface RandomButtonListener {
-		void RandomButtonClicked();
+		void randomButtonClicked();
 	}
 
 	public interface IntelligentButtonListener {
-		void IntelligentButtonClicked();
+		void intelligentButtonClicked();
 	}
 
 	public AutomaticMovesPanel(RandomButtonListener randomListener,
@@ -83,7 +83,7 @@ public class AutomaticMovesPanel extends JPanel {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						listener.RandomButtonClicked();
+						listener.randomButtonClicked();
 					}
 
 				});
@@ -96,7 +96,7 @@ public class AutomaticMovesPanel extends JPanel {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						listener.IntelligentButtonClicked();
+						listener.intelligentButtonClicked();
 					}
 
 				});

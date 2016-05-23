@@ -21,7 +21,7 @@ public class PlayerModesPanel extends JPanel {
 	private JComboBox<String> playerGameModes;
 
 	public interface PlayerModesChangeListener {
-		void SetButtonClicked(Piece piece, String mode);
+		void setButtonClicked(Piece piece, String mode);
 	}
 
 	public PlayerModesPanel(Piece pieces[], PlayerModesChangeListener listener,
@@ -66,12 +66,12 @@ public class PlayerModesPanel extends JPanel {
 		setButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (viewPiece == null) {
-					listener.SetButtonClicked(
+					listener.setButtonClicked(
 							pieces[playerName.getSelectedIndex()],
 							playerModesArray[playerGameModes
 									.getSelectedIndex()]);
 				} else {
-					listener.SetButtonClicked(viewPiece,
+					listener.setButtonClicked(viewPiece,
 							(String) playerGameModes.getSelectedItem());
 				}
 			}

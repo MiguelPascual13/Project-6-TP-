@@ -1,10 +1,12 @@
 package es.ucm.fdi.tp.project6.utils;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import es.ucm.fdi.tp.basecode.bgame.Utils;
+import java.util.Collections;
+
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 import es.ucm.fdi.tp.project6.Main;
 
@@ -18,16 +20,16 @@ public class PieceColorMap {
 	private Map<Piece, Color> colorMap;
 	public static final Color OBSTACLE_COLOR = Color.BLACK;
 	public static final Color EMPTY_COLOR = Color.GRAY;
-	private static int CHOOSABLE_COLORS = 7;
 
 	/**
 	 * Seven colors for seven players.
 	 */
-	private Color colors[] = { Color.BLUE, Color.GREEN, Color.MAGENTA,
+	private final Color colors[] = { Color.BLUE, Color.GREEN, Color.MAGENTA,
 			Color.ORANGE, Color.PINK, Color.RED, Color.YELLOW };
 
 	public PieceColorMap() {
 		colorMap = new HashMap<Piece, Color>();
+		Collections.shuffle(Arrays.asList(colors));
 	}
 
 	/**
@@ -38,23 +40,16 @@ public class PieceColorMap {
 	 * @return
 	 */
 	public Color getColorFor(Piece piece) {
-		if (piece != null) {
-			if (isObstacle(piece))
-				return OBSTACLE_COLOR;
-			else {
-				if (colorMap.containsKey(piece))
-					return colorMap.get(piece);
-				else {
-					Color newColor = colors[Utils.randomInt(CHOOSABLE_COLORS)];
-					while (colorMap.containsValue(newColor)) {
-						newColor = colors[Utils.randomInt(CHOOSABLE_COLORS)];
-					}
-					colorMap.put(piece, newColor);
-					return colorMap.get(piece);
-				}
+		if (piece == null) return EMPTY_COLOR;
+		
+		if (isObstacle(piece)) {
+			return OBSTACLE_COLOR;
+		} else {
+			if (!colorMap.containsKey(piece)) {
+				colorMap.put(piece, colors[colorMap.size()]);
 			}
-		} else
-			return EMPTY_COLOR;
+			return colorMap.get(piece);
+		}
 	}
 
 	private boolean isObstacle(Piece piece) {

@@ -134,12 +134,19 @@ public class GameClient extends Controller implements Observable<GameObserver> {
 		gameOver = false;
 		while (!gameOver) {
 			try {
-				Response res = (Response) connectionToServer.getObject();
-				for (GameObserver o : observers) {
-					res.run(o);
+				Object obj = connectionToServer.getObject();
+				if (obj instanceof String) {
+					this.stop();
+					this.connectionToServer.stop();
+				} else {
+					Response res = (Response) obj;
+					for (GameObserver o : observers) {
+						res.run(o);
+					}
 				}
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
+				this.gameOver = true;
 			}
 		}
 	}

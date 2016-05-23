@@ -32,7 +32,9 @@ public class PlayerInformationPanel extends JPanel {
 	private static final String columNames[] = {"Player", "Mode", "#Pieces"};
 
 	private JScrollPane scrollPane;
+	private MyTableModel tableModel;
 	private JTable table;
+	private Board board;
 	
 	/**
 	 * 
@@ -52,11 +54,13 @@ public class PlayerInformationPanel extends JPanel {
 			PlayersMap playersMap) {
 
 		super(new BorderLayout());
+		this.board = board;
 		this.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEtchedBorder(), PANEL_NAME_TEXT));
 		
-		table = new JTable(new MyTableModel(pieces, columNames, board, viewPiece,
-				playersMap));
+		tableModel = new MyTableModel(pieces, columNames, this.board, viewPiece,
+				playersMap);
+		table = new JTable(tableModel);
 		for (int i = 0; i < columNames.length; i++) {
 			table.getColumnModel().getColumn(i).setHeaderValue(columNames[i]);
 		}
@@ -85,7 +89,9 @@ public class PlayerInformationPanel extends JPanel {
 	 *
 	 */
 
-	public void updateTableInfo() {
+	public void updateTableInfo(Board board) {
+		this.board = board;
+		this.tableModel.setBoard(board);
 		this.repaint();
 	}
 	
@@ -192,6 +198,10 @@ public class PlayerInformationPanel extends JPanel {
 
 		public boolean isCellEditable(int row, int col) {
 			return false;
+		}
+		
+		public void setBoard(Board board){
+			this.board = board;
 		}
 	}
 }

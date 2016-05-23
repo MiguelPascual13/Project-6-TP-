@@ -202,7 +202,6 @@ public class GameServer extends Controller implements GameObserver {
 			if (this.currentClients == this.requiredClients) {
 				if (isTheFirstTime) {
 					game.start(pieces);
-					append("The game starts now!!!");
 					isTheFirstTime = false;
 				} else {
 					game.restart();
@@ -274,6 +273,15 @@ public class GameServer extends Controller implements GameObserver {
 			public void stopButtonClicked() {
 				controlGUI.append("Server Stopped");
 				controlGUI.dispose();
+				for(int i=0; i<GameServer.this.requiredClients; i++){
+					try {
+						GameServer.this.clients.get(i).sendObject("Server Closed");
+						GameServer.this.clients.get(i).stop();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				GameServer.this.stop();
 			}
 		};
 	}
@@ -301,13 +309,18 @@ public class GameServer extends Controller implements GameObserver {
 	@Override
 	public void onGameStart(Board board, String gameDesc, List<Piece> pieces,
 			Piece turn) {
+		append("The game starts now!!!");
 		this.forwardNotification(
 				new GameStartResponse(board, gameDesc, pieces, turn));
 	}
 
 	@Override
 	public void onGameOver(Board board, State state, Piece winner) {
+		append("The game ends now!!!");
 		this.forwardNotification(new GameOverResponse(board, state, winner));
+		this.gameOver = true;
+		this.clients.clear();
+		this.currentClients = 0;
 	}
 
 	@Override
