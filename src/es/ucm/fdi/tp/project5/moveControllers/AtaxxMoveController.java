@@ -9,8 +9,7 @@ import es.ucm.fdi.tp.basecode.bgame.model.GameMove;
 import es.ucm.fdi.tp.basecode.bgame.model.GameRules;
 import es.ucm.fdi.tp.basecode.bgame.model.Pair;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
-import es.ucm.fdi.tp.project6.ataxx.AtaxxMove;
-import es.ucm.fdi.tp.project6.utils.ExternalUtils;
+import es.ucm.fdi.tp.project5.ataxx.AtaxxMove;
 
 /**
  * Move controller for ataxx.
@@ -52,7 +51,7 @@ public class AtaxxMoveController extends MoveController {
 			if (somethingSelected) {
 				if (board.getPosition(row, column) == null) {
 					setDestinationCell(row, column);
-					if (ExternalUtils.InfiniteDistanceExceeded(oldRow, oldColumn, row,
+					if (InfiniteDistanceExceeded(oldRow, oldColumn, row,
 							column)) {
 						return NOTHING_TO_REPAINT;
 					}
@@ -66,7 +65,7 @@ public class AtaxxMoveController extends MoveController {
 				} else
 					return NOTHING_TO_REPAINT;
 			} else {
-				if (board.getPosition(row, column).equals(turn)) {
+				if (board.getPosition(row, column) !=null && board.getPosition(row, column).equals(turn)) {
 					/*
 					 * Says to the view that the filter must be ON in the next
 					 * repaint.
@@ -125,7 +124,7 @@ public class AtaxxMoveController extends MoveController {
 			List<Pair<Integer, Integer>> filterOnCellsList = new ArrayList<Pair<Integer, Integer>>();
 			for (int i = 0; i < board.getRows(); i++) {
 				for (int j = 0; j < board.getCols(); j++) {
-					if ((!ExternalUtils.InfiniteDistanceExceeded(selectedRow,
+					if ((!InfiniteDistanceExceeded(selectedRow,
 							selectedColumn, i, j)
 							&& board.getPosition(i, j) == null)
 							|| ((i == selectedRow) && (j == selectedColumn))) {
@@ -141,5 +140,11 @@ public class AtaxxMoveController extends MoveController {
 	@Override
 	public String notifyMoveStartInstructions() {
 		return MOVE_START_MESSAGE;
+	}
+	
+	private static boolean InfiniteDistanceExceeded(int oldRow, int oldColumn,
+			int row, int column) {
+		return Math.max(Math.abs(oldRow - row),
+				Math.abs(oldColumn - column)) > 2;
 	}
 }

@@ -11,7 +11,6 @@ import es.ucm.fdi.tp.basecode.bgame.model.GameMove;
 import es.ucm.fdi.tp.basecode.bgame.model.GameRules;
 import es.ucm.fdi.tp.basecode.bgame.model.Pair;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
-import es.ucm.fdi.tp.project6.utils.ExternalUtils;
 
 /**
  * Rules for Ataxx game.
@@ -349,7 +348,7 @@ public class AtaxxRules implements GameRules {
 			int y = column + ds[1];
 			if (inBoard(x, y) && board.getPosition(x, y) == null) {
 				int aux = 0;
-				if (ExternalUtils.infiniteDistance(row, column, x, y) == 1)
+				if (infiniteDistance(row, column, x, y) == 1)
 					aux = 1;
 				coefficient = Math.max(
 						howManyAreEaten(board, x, y, passivePiece) + aux,
@@ -387,5 +386,10 @@ public class AtaxxRules implements GameRules {
 
 		return eaten;
 	}
-
+	
+	private static int infiniteDistance(int oldRow, int oldColumn, int row,
+			int column) {
+		return Math.max(Math.abs(oldRow - row), Math.abs(oldColumn - column));
+	}
+	
 }
