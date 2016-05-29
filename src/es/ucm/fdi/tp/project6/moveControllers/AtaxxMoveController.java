@@ -65,7 +65,7 @@ public class AtaxxMoveController extends MoveController {
 				} else
 					return NOTHING_TO_REPAINT;
 			} else {
-				if (board.getPosition(row, column).equals(turn)) {
+				if (board.getPosition(row, column) !=null && board.getPosition(row, column).equals(turn)) {
 					/*
 					 * Says to the view that the filter must be ON in the next
 					 * repaint.

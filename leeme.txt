@@ -33,3 +33,7 @@
 
 	Es posible que en el basecode haya algún cambio accidental (algún control-shift-f involuntario) pero
 	en ningún caso afecta a la funcionalidad. Creemos que funciona correctamente.
+
+---Cambios Realizados en la práctica 6---
+Añadido un board.getposition(row, column)!= null en un if del ataxxMoveController.
+Y quitando la clase externalutils trasladando los respectivos metodos a las unicas respectivas clases donde se usaban.
